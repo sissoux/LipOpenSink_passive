@@ -1,7 +1,7 @@
 # LipOpenSink\_Passive
 
-**Smart passive load add-on for the ToolkitRC M8D charger.**\
-Bridges Channel 1 → Channel 2 into an external **3.3 Ω / 300 W** resistor for higher discharge power.\
+**Smart passive load add-on for the ToolkitRC M8D charger.**
+Bridges Channel 1 → Channel 2 into an external **3.3 Ω / 300 W** resistor for higher discharge power.
 An onboard **RP2040** supervises temperature, drives a **12 V fan** (from the M8D’s USB-C PD), and **cuts the load** on over-temperature. A simple **USB configuration tool** lets you tune behavior and update lookup tables (LUTs). The whole assembly fits a **3D-printed housing**.
 
 > **Safety note:** The load must **not** be used without the fan. The circuit only closes when the 12 V fan supply is present via USB-C PD.
@@ -10,11 +10,11 @@ An onboard **RP2040** supervises temperature, drives a **12 V fan** (from the M8
 
 ## Features
 
-- Temperature monitoring with configurable filtering and calibration
-- Fan control via LUT (temperature → PWM duty) with hysteresis and smooth ramping
-- Over-temperature cutoff for the load, with LED indicator bonded to `LOAD_EN`
-- USB configuration tool (UART/CDC) to adjust parameters and update LUTs
-- 3D-printable enclosure optimized for airflow and mounting
+* Temperature monitoring with configurable filtering and calibration
+* Fan control via LUT (temperature → PWM duty) with hysteresis and smooth ramping
+* Over-temperature cutoff for the load, with LED indicator bonded to `LOAD_EN`
+* USB configuration tool (UART/CDC) to adjust parameters and update LUTs
+* 3D-printable enclosure optimized for airflow and mounting
 
 ---
 
@@ -76,19 +76,19 @@ python config_tool/config_gui.py
 
 In the GUI:
 
-- Select the **serial port** (CDC/COM) and **Connect**.
-- **Refresh** to load current parameters and LUTs.
-- Edit values, then **Apply** and **Save to flash** if desired.
+* Select the **serial port** (CDC/COM) and **Connect**.
+* **Refresh** to load current parameters and LUTs.
+* Edit values, then **Apply** and **Save to flash** if desired.
 
 ---
 
 ## What You Can Configure
 
-- **Thermal & Safety**: cutoff temperature, hysteresis, ADC filtering
-- **Fan Behavior**: minimum duty, ramp time/step, temperature → duty LUT
-- **Calibration**: Vin and Temp channels (`a·x + b` form)
-- **Telemetry**: rate (ms) and format (CSV or human-readable)
-- **Lookup Tables**: ADC → Temperature, Temperature → Duty; import/export CSV
+* **Thermal & Safety**: cutoff temperature, hysteresis, ADC filtering
+* **Fan Behavior**: minimum duty, ramp time/step, temperature → duty LUT
+* **Calibration**: Vin and Temp channels (`a·x + b` form)
+* **Telemetry**: rate (ms) and format (CSV or human-readable)
+* **Lookup Tables**: ADC → Temperature, Temperature → Duty; import/export CSV
 
 ---
 
@@ -104,9 +104,9 @@ In the GUI:
 
 ## Licenses
 
-- **Hardware:** CERN-OHL-P
-- **Firmware & Configuration Tool:** MIT
-- **3D Models:** CC-BY-SA 4.0
+* **Hardware:** CERN-OHL-P
+* **Firmware & Configuration Tool:** MIT
+* **3D Models:** CC-BY-SA 4.0
 
 ---
 
@@ -118,7 +118,6 @@ In the GUI:
 
 ## Notes
 
-- The external load path is **interlocked** with fan power: no fan → no load.
-- The **ToolkitRC M8D** must be set to discharge/bridge as per its documentation.
-- Validate thermal performance with your specific print, resistor tolerance, and ambient airflow before full-power use.
-
+* The external load path is **interlocked** with fan power: no fan → no load.
+* The **ToolkitRC M8D** must be set to discharge/bridge as per its documentation.
+* Validate thermal performance with your specific print, resistor tolerance, and ambient airflow before full-power use.

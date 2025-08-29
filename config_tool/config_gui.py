@@ -121,7 +121,7 @@ PARAM_SCHEMA = {
     "VIN_CAL_A": (
         "Vin cal. A",
         "Calibration coefficient A for VIN: y=A*x+B",
-        lambda s: -10.0 <= float(s) <= 10.0,
+        lambda s: -10.0 <= float(s) <= 25.0,
     ),
     "VIN_CAL_B": (
         "Vin cal. B",

@@ -161,6 +161,17 @@ def iir_update(prev_y: float, x: float, fc_hz: float, dt_s: float) -> float:
         alpha = 1.0
     return prev_y + alpha * (x - prev_y)
 
+def calibrateTemp(rawTempValue: float) -> float:
+    """
+    Convert uncalibrated temperature in °C using the stored linear calibration.
+
+    Args:
+        rawTempValue: Temperature input (°C).
+
+    Returns:
+        Temperature in °C.
+    """
+    return params["TEMP_CAL_A"]*rawTempValue+params["TEMP_CAL_B"]
 
 def temp_from_adc(raw_adc_count: int) -> float:
     """
@@ -173,15 +184,15 @@ def temp_from_adc(raw_adc_count: int) -> float:
         Temperature in °C.
     """
     if raw_adc_count >= ADC_TO_TEMP_5C[0][0]:
-        return ADC_TO_TEMP_5C[0][1]
+        return calibrateTemp(ADC_TO_TEMP_5C[0][1])
     if raw_adc_count <= ADC_TO_TEMP_5C[-1][0]:
-        return ADC_TO_TEMP_5C[-1][1]
+        return calibrateTemp(ADC_TO_TEMP_5C[-1][1])
     for i in range(len(ADC_TO_TEMP_5C) - 1):
         a1, t1 = ADC_TO_TEMP_5C[i]
         a2, t2 = ADC_TO_TEMP_5C[i + 1]
         if a2 <= raw_adc_count <= a1:
             ratio = (raw_adc_count - a1) / (a2 - a1)
-            return t1 + (t2 - t1) * ratio
+            return calibrateTemp(t1 + (t2 - t1) * ratio)
     return ADC_TO_TEMP_5C[-1][1]
 
 
@@ -607,7 +618,7 @@ while True:
 
         # Convert to calibrated volts
         vin_v = params["VIN_CAL_A"] * ((raw_vin_f * VREF) / ADC_MAX) + params["VIN_CAL_B"]
-        tmp_v = params["TEMP_CAL_A"] * ((raw_temp_f * VREF) / ADC_MAX) + params["TEMP_CAL_B"]
+        tmp_v = (raw_temp_f * VREF) / ADC_MAX
 
         # Back to counts for LUT
         tmp_counts = int(clamp((tmp_v / VREF) * ADC_MAX, 0, ADC_MAX))

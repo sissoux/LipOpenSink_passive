@@ -116,7 +116,7 @@ PARAM_SCHEMA = {
     "TEMP_CAL_B": (
         "Temp cal. B",
         "Calibration offset B for temperature voltage (Volts)",
-        lambda s: -2.0 <= float(s) <= 2.0,
+        lambda s: -100.0 <= float(s) <= 100.0,
     ),
     "VIN_CAL_A": (
         "Vin cal. A",
@@ -402,14 +402,22 @@ class App(ttk.Frame):
         params_frame = ttk.LabelFrame(self, text="Parameters")
         params_frame.grid(row=1, column=1, sticky="nsew", padx=8, pady=6)
         self.param_vars: Dict[str, tk.StringVar] = {}
+        self.param_entries: Dict[str, ttk.Entry] = {}
         for i, key in enumerate(PARAM_ORDER):
             label, tip, _validator = PARAM_SCHEMA[key]
             ttk.Label(params_frame, text=label+":").grid(row=i, column=0, sticky="e", padx=6, pady=2)
             var = tk.StringVar(value="")
-            ent = ttk.Entry(params_frame, textvariable=var, width=14)
-            ent.grid(row=i, column=1, sticky="w", padx=6, pady=2)
+            # For MIN_FAN_DUTY, show entry in percent
+            if key == "MIN_FAN_DUTY":
+                ent = ttk.Entry(params_frame, textvariable=var, width=14)
+                ent.grid(row=i, column=1, sticky="w", padx=6, pady=2)
+                ToolTip(ent, f"{label}: {tip}\nKey: {key}\nEnter as percent (0–100)")
+            else:
+                ent = ttk.Entry(params_frame, textvariable=var, width=14)
+                ent.grid(row=i, column=1, sticky="w", padx=6, pady=2)
+                ToolTip(ent, f"{label}: {tip}\nKey: {key}")
             self.param_vars[key] = var
-            ToolTip(ent, f"{label}: {tip}\nKey: {key}")
+            self.param_entries[key] = ent
 
         # Bottom bar: actions
         actions = ttk.Frame(self)
@@ -418,12 +426,16 @@ class App(ttk.Frame):
         ttk.Button(actions, text="Apply Params", command=self.on_apply).grid(row=0, column=1, padx=4)
         ttk.Button(actions, text="Save to Flash", command=self.on_save).grid(row=0, column=2, padx=4)
         ttk.Button(actions, text="Fan Auto", command=lambda: self._send('FAN AUTO')).grid(row=0, column=3, padx=4)
-        ttk.Button(actions, text="Fan 40%", command=lambda: self._send('FAN DUTY 0.4')).grid(row=0, column=4, padx=4)
-        ttk.Button(actions, text="Quiet", command=lambda: self._send('QUIET')).grid(row=0, column=5, padx=4)
+        # Manual Fan Duty Entry (percent)
+        # ttk.Label(actions, text="Fan Duty (%):").grid(row=0, column=4, padx=4)
+        ttk.Button(actions, text="Set Fan Duty", command=self.on_set_fan_duty).grid(row=0, column=5, padx=4)
+        self.fan_duty_var = tk.StringVar(value="40")
+        ttk.Entry(actions, textvariable=self.fan_duty_var, width=6).grid(row=0, column=6, padx=2)
+        # ttk.Button(actions, text="Quiet", command=lambda: self._send('QUIET')).grid(row=0, column=7, padx=4)
         # Calibration buttons
-        ttk.Button(actions, text="Cal VIN (1pt)", command=self.on_cal_vin_1pt).grid(row=0, column=6, padx=8)
-        ttk.Button(actions, text="Cal VIN (2pt)", command=self.on_cal_vin_2pt).grid(row=0, column=7, padx=4)
-        ttk.Button(actions, text="Cal TEMP (1pt)", command=self.on_cal_temp_1pt).grid(row=0, column=8, padx=8)
+        ttk.Button(actions, text="Cal VIN (1pt)", command=self.on_cal_vin_1pt).grid(row=0, column=7, padx=8)
+        ttk.Button(actions, text="Cal VIN (2pt)", command=self.on_cal_vin_2pt).grid(row=0, column=8, padx=4)
+        ttk.Button(actions, text="Cal TEMP (1pt)", command=self.on_cal_temp_1pt).grid(row=0, column=9, padx=8)
 
         # Status bar
         self.status = tk.StringVar(value="Disconnected")
@@ -600,44 +612,97 @@ class App(ttk.Frame):
             raise RuntimeError(first)
         line = lines[0] if lines else ""
         return float(line.strip())
-
+    
     def on_cal_vin_1pt(self) -> None:
+        """Calibrate VIN slope (A) by averaging readings for 5 seconds and comparing to actual VIN. Offset (B) is assumed zero."""
         if not self.dev:
             return
         try:
-            s = tk.simpledialog.askstring(APP_NAME, "Enter actual VIN (Volts):")
+            s = tk.simpledialog.askstring(APP_NAME, "5 seconds single point calibration. Enter actual VIN (Volts):")
             if not s:
                 return
             v_true = float(s)
-            p = self._get_params_dict()
-            a = float(p.get("VIN_CAL_A", 1.0))
-            b = float(p.get("VIN_CAL_B", 0.0))
-            vin_raw, _ = self._raw_volts()
-            # target: a*vin_raw + b_new = v_true ⇒ b_new = v_true - a*vin_raw
-            b_new = v_true - a * vin_raw
-            self.dev.set_param("VIN_CAL_B", str(b_new))
+            # Set calibration A and B to 1.0 and 0.0 first
+            self.dev.set_param("VIN_CAL_A", "1.0")
+            self.dev.set_param("VIN_CAL_B", "0.0")
             self.on_refresh()
-            messagebox.showinfo("Cal VIN (1pt)", f"VIN_CAL_B set to {b_new:.6f}")
+            # Gather VIN readings for 5 seconds
+            readings = []
+            start = time.time()
+            while time.time() - start < 5.0:
+                try:
+                    telem = self.dev.telem_queue.get(timeout=0.5)
+                    parts = telem.split(",")
+                    if len(parts) >= 1:
+                        vin_read = float(parts[0])
+                        readings.append(vin_read)
+                except Exception:
+                    pass
+            if not readings:
+                raise RuntimeError("No VIN readings received.")
+            v_avg = sum(readings) / len(readings)
+            # Calculate slope (A) assuming offset B=0
+            if abs(v_avg) < 1e-6:
+                raise RuntimeError("Averaged VIN reading too close to zero; cannot calibrate slope.")
+            a_new = v_true / v_avg
+            self.dev.set_param("VIN_CAL_A", str(a_new))
+            self.on_refresh()
+            messagebox.showinfo("Cal VIN (1pt)", f"VIN_CAL_A set to {a_new:.6f}\nAveraged reading: {v_avg:.6f} V\nOffset (B) assumed 0.0 V")
         except Exception as e:
             messagebox.showerror("Cal VIN (1pt)", str(e))
 
     def on_cal_vin_2pt(self) -> None:
+        """Calibrate VIN slope (A) and offset (B) using two points and averaged readings."""
         if not self.dev:
             return
         try:
+            # First point
             s1 = tk.simpledialog.askstring(APP_NAME, "Enter actual VIN #1 (Volts), then click OK:")
             if not s1:
                 return
             v1 = float(s1)
-            vin_raw1, _ = self._raw_volts()
+            messagebox.showinfo("Cal VIN (2pt)", "Averaging readings for 5 seconds at VIN #1...")
+            readings1 = []
+            start = time.time()
+            while time.time() - start < 5.0:
+                try:
+                    telem = self.dev.telem_queue.get(timeout=0.5)
+                    parts = telem.split(",")
+                    if len(parts) >= 1:
+                        vin_read = float(parts[0])
+                        readings1.append(vin_read)
+                except Exception:
+                    pass
+            if not readings1:
+                raise RuntimeError("No VIN readings received for point 1.")
+            vin_raw1 = sum(readings1) / len(readings1)
+
+            # Second point
             messagebox.showinfo("Cal VIN (2pt)", "Now change to the second known VIN and press OK")
             s2 = tk.simpledialog.askstring(APP_NAME, "Enter actual VIN #2 (Volts), then click OK:")
             if not s2:
                 return
             v2 = float(s2)
-            vin_raw2, _ = self._raw_volts()
+            messagebox.showinfo("Cal VIN (2pt)", "Averaging readings for 5 seconds at VIN #2...")
+            readings2 = []
+            start = time.time()
+            while time.time() - start < 5.0:
+                try:
+                    telem = self.dev.telem_queue.get(timeout=0.5)
+                    parts = telem.split(",")
+                    if len(parts) >= 1:
+                        vin_read = float(parts[0])
+                        readings2.append(vin_read)
+                except Exception:
+                    pass
+            if not readings2:
+                raise RuntimeError("No VIN readings received for point 2.")
+            vin_raw2 = sum(readings2) / len(readings2)
+
             if abs(vin_raw2 - vin_raw1) < 1e-6:
                 raise RuntimeError("Raw readings too close; choose distinct points.")
+
+            # Calculate slope (A) and offset (B)
             a_new = (v2 - v1) / (vin_raw2 - vin_raw1)
             b_new = v1 - a_new * vin_raw1
             self.dev.set_param("VIN_CAL_A", str(a_new))
@@ -648,23 +713,35 @@ class App(ttk.Frame):
             messagebox.showerror("Cal VIN (2pt)", str(e))
 
     def on_cal_temp_1pt(self) -> None:
+        """Calibrate temperature offset by averaging readings for 5 seconds and comparing to actual temperature."""
         if not self.dev:
             return
         try:
-            s = tk.simpledialog.askstring(APP_NAME, "Enter actual Temperature (°C):")
+            s = tk.simpledialog.askstring(APP_NAME, "5 seconds single point calibration. Enter actual Temperature (°C):")
             if not s:
                 return
             t_true = float(s)
-            p = self._get_params_dict()
-            a = float(p.get("TEMP_CAL_A", 1.0))
-            b = float(p.get("TEMP_CAL_B", 0.0))
-            _, t_raw_v = self._raw_volts()
-            v_target = self._tempv_for(t_true)
-            # a*t_raw_v + b_new = v_target ⇒ b_new = v_target - a*t_raw_v
-            b_new = v_target - a * t_raw_v
+            # Gather temperature readings for 5 seconds
+            readings = []
+            start = time.time()
+            while time.time() - start < 5.0:
+                # Try to get a telemetry reading from the queue
+                try:
+                    telem = self.dev.telem_queue.get(timeout=0.5)
+                    parts = telem.split(",")
+                    if len(parts) >= 3:
+                        t_read = float(parts[2])
+                        readings.append(t_read)
+                except Exception:
+                    pass
+            if not readings:
+                raise RuntimeError("No temperature readings received.")
+            t_avg = sum(readings) / len(readings)
+            # B is the offset between real temperature and the readings
+            b_new = t_true - t_avg + float(self._get_params_dict().get("TEMP_CAL_B", 0.0))
             self.dev.set_param("TEMP_CAL_B", str(b_new))
             self.on_refresh()
-            messagebox.showinfo("Cal TEMP (1pt)", f"TEMP_CAL_B set to {b_new:.6f} V")
+            messagebox.showinfo("Cal TEMP (1pt)", f"TEMP_CAL_B set to {b_new:.3f} °C\nAveraged reading: {t_avg:.3f} °C")
         except Exception as e:
             messagebox.showerror("Cal TEMP (1pt)", str(e))
 
@@ -675,7 +752,14 @@ class App(ttk.Frame):
         try:
             p = self.dev.get_params()
             for k, var in self.param_vars.items():
-                var.set(str(p.get(k, "")))
+                # For MIN_FAN_DUTY, show as percent
+                if k == "MIN_FAN_DUTY":
+                    try:
+                        var.set(str(round(float(p.get(k, "0")) * 100)))
+                    except Exception:
+                        var.set("")
+                else:
+                    var.set(str(p.get(k, "")))
             self.status.set("Parameters loaded")
         except Exception as e:
             messagebox.showerror("Refresh", str(e))
@@ -688,11 +772,28 @@ class App(ttk.Frame):
             for k, var in self.param_vars.items():
                 val = var.get().strip()
                 label, tip, validator = PARAM_SCHEMA[k]
-                if not validator(val):
-                    raise ValueError(f"Invalid value for {k}: {val}\n{tip}")
+                # For MIN_FAN_DUTY, validate percent
+                if k == "MIN_FAN_DUTY":
+                    try:
+                        pct = float(val)
+                        if not (0.0 <= pct <= 100.0):
+                            raise ValueError
+                        duty = pct / 100.0
+                        if not validator(str(duty)):
+                            raise ValueError
+                    except Exception:
+                        raise ValueError(f"Invalid value for {k}: {val}\nEnter percent (0–100)")
+                else:
+                    if not validator(val):
+                        raise ValueError(f"Invalid value for {k}: {val}\n{tip}")
             # push
             for k, var in self.param_vars.items():
-                self.dev.set_param(k, var.get().strip())
+                val = var.get().strip()
+                if k == "MIN_FAN_DUTY":
+                    duty = float(val) / 100.0
+                    self.dev.set_param(k, str(duty))
+                else:
+                    self.dev.set_param(k, val)
             self.status.set("Parameters applied")
         except Exception as e:
             messagebox.showerror("Apply", str(e))
@@ -714,6 +815,20 @@ class App(ttk.Frame):
             self.dev.cmd(line)
         except Exception as e:
             messagebox.showerror("Command", str(e))
+
+    def on_set_fan_duty(self) -> None:
+        """Set manual fan duty from entry (percent)."""
+        if not self.dev:
+            return
+        try:
+            val = float(self.fan_duty_var.get())
+            if not (0.0 <= val <= 100.0):
+                raise ValueError("Duty must be between 0 and 100 percent")
+            duty = val / 100.0
+            self.dev.cmd(f"FAN DUTY {duty}")
+            self.status.set(f"Fan duty set to {val:.0f}%")
+        except Exception as e:
+            messagebox.showerror("Fan Duty", str(e))
 
 
 # ------------------------------

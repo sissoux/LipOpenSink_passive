@@ -128,9 +128,36 @@ PARAM_SCHEMA = {
         "Calibration offset B for VIN (Volts)",
         lambda s: -5.0 <= float(s) <= 5.0,
     ),
+    "LOAD_TRIP_V": (
+        "Load cutoff (V)",
+        "Voltage to disable LOAD_EN. LOAD re-enables at (cutoff - hysteresis)",
+        lambda s: 5.0 <= float(s) <= 15.0,
+    ),
+    "HYST_V": (
+        "Hysteresis (V)",
+        "Voltage hysteresis for load re-enable. Typical: 0.5V",
+        lambda s: 0.0 <= float(s) <= 5.0,
+    ),
 }
 
-PARAM_ORDER = list(PARAM_SCHEMA.keys())
+PARAM_ORDER = [
+    "MIN_FAN_DUTY",
+    "HYST_C",
+    "LOAD_TRIP_C",
+    "FAST_DT_MS",
+    "FC_TEMP_HZ",
+    "FC_VIN_HZ",
+    "RAMP_TIME_MS",
+    "RAMP_STEP_MS",
+    "TELEM_RATE_MS",
+    "TELEM_FORMAT",
+    "TEMP_CAL_A",
+    "TEMP_CAL_B",
+    "VIN_CAL_A",
+    "VIN_CAL_B",
+    "LOAD_TRIP_V",
+    "HYST_V",
+]
 
 
 # ------------------------------

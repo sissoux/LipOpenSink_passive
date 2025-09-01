@@ -83,6 +83,10 @@ params = {
     "TEMP_CAL_B":    0.0,
     "VIN_CAL_A":     (10.0/100.9),
     "VIN_CAL_B":     0.0,
+
+    # Added parameters for load cutoff on voltage
+    "LOAD_TRIP_V":   8.5,       # Voltage cutoff threshold (V)
+    "HYST_V":        0.5,       # Voltage hysteresis (V)
 }
 
 # -------------------------------
@@ -434,6 +438,8 @@ def load_defaults_ram():
             "TEMP_CAL_B": 0.0,
             "VIN_CAL_A": (10.0 / 100.9),
             "VIN_CAL_B": 0.0,
+            "LOAD_TRIP_V": 8.5,   # Default voltage cutoff
+            "HYST_V": 0.5,        # Default voltage hysteresis
         }
     )
     TEMP_TO_DUTY[:] = [(float(t), float(d)) for (t, d) in TEMP_TO_DUTY_BOOT]
@@ -636,10 +642,10 @@ while True:
 
         # Load cutoff with hysteresis; LED bonded
         if load_enabled:
-            if last_temp_c >= params["LOAD_TRIP_C"]:
+            if last_temp_c >= params["LOAD_TRIP_C"] and vin_v < (params["LOAD_TRIP_V"]- params["HYST_V"]):
                 load_enabled = False
         else:
-            if last_temp_c <= (params["LOAD_TRIP_C"] - params["HYST_C"]):
+            if last_temp_c <= (params["LOAD_TRIP_C"] - params["HYST_C"]) or vin_v >= params["LOAD_TRIP_V"]:
                 load_enabled = True
         load_en.value = load_enabled
         led.value = load_enabled

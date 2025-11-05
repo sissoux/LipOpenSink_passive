@@ -1,123 +1,123 @@
 # LipOpenSink\_Passive
 
-**Smart passive load add-on for the ToolkitRC M8D charger.**
-Bridges Channel 1 → Channel 2 into an external **3.3 Ω / 300 W** resistor for higher discharge power.
-An onboard **RP2040** supervises temperature, drives a **12 V fan** (from the M8D’s USB-C PD), and **cuts the load** on over-temperature. A simple **USB configuration tool** lets you tune behavior and update lookup tables (LUTs). The whole assembly fits a **3D-printed housing**.
+Smart passive load add-on for the ToolkitRC M8D charger. Bridges Channel 1 → Channel 2 into an external 3.3 Ω / 300 W resistor for higher discharge power. An onboard RP2040 supervises temperature, drives a 12 V fan (from the M8D’s USB-C PD), and cuts the load on error/thresholds. A simple USB configuration tool lets you tune behavior and monitor telemetry.
 
-> **Safety note:** The load must **not** be used without the fan. The circuit only closes when the 12 V fan supply is present via USB-C PD.
+> Safety note: Ensure adequate cooling. Firmware enforces "no fan → no load": when the fan tach (GP12) shows no pulses while the fan should be running, the load is forced OFF and the LED blinks. Temperature and VIN thresholds also protect the load.
 
 ---
 
 ## Features
 
-* Temperature monitoring with configurable filtering and calibration
-* Fan control via LUT (temperature → PWM duty) with hysteresis and smooth ramping
-* Over-temperature cutoff for the load, with LED indicator bonded to `LOAD_EN`
-* USB configuration tool (UART/CDC) to adjust parameters and update LUTs
-* 3D-printable enclosure optimized for airflow and mounting
+- Temperature monitoring with configurable filtering and calibration
+- Fan control via LUT (temperature → PWM duty) with hysteresis and smooth ramping
+- Load cutoff on over-temperature, with LED indicator
+- Optional VIN-based load cutoff with hysteresis (configurable)
+- Fan presence check via tach on GP12; interlock enforces "no fan → no load" with blinking LED
+- Settings persistence in RP2040 NVM (CRC-checked, adaptive to capacity)
+- USB configuration tool (CDC/serial) to edit parameters and view telemetry
 
 ---
 
-## Repository Structure
+## Repository structure
 
-```markdown
+```text
 .
 ├── firmware/               # RP2040 (CircuitPython)
-│   ├── main.py             # Firmware entry point
-│   └── LUTs.py             # Lookup tables (ADC→Temp, Temp→Duty)
+│   ├── boot.py             # Optional: expose dual CDC ports early
+│   ├── code.py             # Firmware entry point
+│   ├── LUTs.py             # Lookup tables (ADC→Temp, Temp→Duty)
+│   └── uart_cmd.py         # Dual-CDC + ASCII command server
 │
 ├── config_tool/            # PC configuration utility (Python 3)
-│   ├── config_gui.py       # Tkinter-based GUI
-│   └── requirements.txt    # pyserial, pandas (tkinter usually preinstalled)
-│
-├── hardware/               # Hardware design files
-│   ├── schematic.pdf
-│   ├── pcb/                # CAD files (KiCad/Altium/etc.)
-│   └── BOM.csv
-│
-├── 3d/                     # Mechanical design
-│   ├── housing.3mf         # Print-ready enclosure
-│   └── preview.png         # Render / photo
+│   ├── config_gui.py       # Tkinter GUI: params, telemetry, calibration
+│   └── requirements.txt    # Dependencies for the GUI
 │
 └── README.md
 ```
 
+Note: Hardware CAD and 3D files are not included in this repository.
+
 ---
 
-## Quick Start
+## Quick start
 
-### Hardware & Assembly
+### Hardware
 
-1. Print the enclosure in `3d/housing.3mf`.
-2. Mount the **3.3 Ω / 300 W** resistor, the fan, and the RP2040 control board.
-3. Connect the module to the **M8D USB-C** port (for **12 V** fan power via PD).
-4. Wire the module in the M8D’s **discharge bridge** path (CH1 → external resistor → CH2).
+1. Assemble the module with the 3.3 Ω / 300 W resistor, fan, and RP2040 board.
+2. Power the fan from the M8D USB-C (12 V PD) as designed in your hardware.
+3. Wire the module in the M8D’s discharge bridge path (CH1 → resistor → CH2).
 
 ### Firmware (RP2040)
 
-1. Install **CircuitPython** for your RP2040 board.
-2. Copy `firmware/main.py` and `firmware/LUTs.py` to the **CIRCUITPY** drive.
-3. Power-cycle the board; defaults will run immediately.
-4. (Optional) Adjust settings with the configuration tool and **save to flash**.
+1. Install CircuitPython for your RP2040 board.
+2. Copy `firmware/code.py` and `firmware/LUTs.py` to the CIRCUITPY drive.
+	- Optional: also copy `firmware/boot.py` to expose both CDC endpoints on boot.
+3. Power-cycle the board; defaults will run immediately (telemetry is OFF by default).
+4. Optionally adjust settings with the configuration tool and save to NVM.
 
-### Configuration Tool (PC)
+### Configuration tool (PC)
 
-Install dependencies:
+Install dependencies (Windows PowerShell example):
 
-```bash
+```
 pip install -r config_tool/requirements.txt
 ```
 
 Launch the GUI:
 
-```bash
+```
 python config_tool/config_gui.py
 ```
 
 In the GUI:
 
-* Select the **serial port** (CDC/COM) and **Connect**.
-* **Refresh** to load current parameters and LUTs.
-* Edit values, then **Apply** and **Save to flash** if desired.
+- Select the serial port (CDC/COM) and Auto-Connect or Connect.
+- Use Refresh to load current parameters; adjust values and Apply; Save to flash when satisfied.
+- Live telemetry (CSV mode) is shown in the panel; you can set manual fan duty for testing.
+
+Currently, the GUI focuses on parameters, telemetry, and basic calibration. LUT editing (upload/download) is supported by the device’s ASCII protocol but not yet exposed in the GUI.
 
 ---
 
-## What You Can Configure
+## What you can configure
 
-* **Thermal & Safety**: cutoff temperature, hysteresis, ADC filtering
-* **Fan Behavior**: minimum duty, ramp time/step, temperature → duty LUT
-* **Calibration**: Vin and Temp channels (`a·x + b` form)
-* **Telemetry**: rate (ms) and format (CSV or human-readable)
-* **Lookup Tables**: ADC → Temperature, Temperature → Duty; import/export CSV
+- Thermal & safety: cutoff temperature, hysteresis, ADC filtering
+- Fan behavior: minimum duty, ramp time/step, temperature → duty LUT (device-side)
+- Calibration: VIN and temperature channels (a·x + b) — temperature offset/slope act on °C
+- Telemetry: rate (ms) and format (CSV or human-readable)
+- VIN-based load cutoff: `LOAD_TRIP_V` and `HYST_V`
 
 ---
 
-## Typical Workflow
+## Updating LUTs (advanced)
 
-1. Assemble and power the module from the M8D (USB-C 12 V).
-2. Flash the firmware and verify the fan spins when temperature requires it.
-3. Connect the **config\_tool** and adjust calibration, LUTs, and thresholds.
-4. **Save to flash**, test with a controlled discharge, and iterate.
-5. Log telemetry to CSV if you want to validate thermal behavior.
+LUTs can be retrieved and updated via the serial ASCII protocol implemented in `uart_cmd.py`:
+
+- GET/SET LUT TEMP_TO_DUTY
+- GET/SET LUT ADC_TO_TEMP_5C
+
+Use a serial terminal to issue HELP for the exact command shapes (BEGIN/END block mode with indexed rows). GUI support for LUT editing is planned but not yet available.
+
+---
+
+## Typical workflow
+
+1. Power the module from the M8D (USB-C 12 V) and flash the firmware.
+2. Verify the fan ramps according to temperature requirements.
+3. Connect the configuration tool; adjust calibration, thresholds, and telemetry rate.
+4. Save to flash, run a controlled discharge, and iterate based on telemetry.
 
 ---
 
 ## Licenses
 
-* **Hardware:** CERN-OHL-P
-* **Firmware & Configuration Tool:** MIT
-* **3D Models:** CC-BY-SA 4.0
-
----
-
-## Gallery
-
-*Add photos/renders of the assembled ****LipOpenSink\_Passive**** here.*
+- Firmware & Configuration Tool: MIT
+- Hardware and 3D files: not included in this repository
 
 ---
 
 ## Notes
 
-* The external load path is **interlocked** with fan power: no fan → no load.
-* The **ToolkitRC M8D** must be set to discharge/bridge as per its documentation.
-* Validate thermal performance with your specific print, resistor tolerance, and ambient airflow before full-power use.
+- Firmware v1.3.0 monitors a Power-Good input but does not gate the load from it; load enable is controlled by temperature and VIN thresholds.
+- Set the ToolkitRC M8D to discharge/bridge as per its documentation.
+- Validate thermal performance for your specific mechanical design and environment before full-power operation.

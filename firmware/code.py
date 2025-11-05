@@ -54,6 +54,9 @@ psu_power_good.direction = digitalio.Direction.INPUT
 psu_power_good.pull = digitalio.Pull.UP
 
 fan = pwmio.PWMOut(board.GP13, frequency=1000, duty_cycle=0)  # 1 kHz Fan PWM
+# NEW: Fan tachometer input (external pull-up)
+fan_tach = digitalio.DigitalInOut(board.GP12)
+fan_tach.direction = digitalio.Direction.INPUT
 load_en = digitalio.DigitalInOut(board.GP28)                   # Load enable
 load_en.direction = digitalio.Direction.OUTPUT
 led = digitalio.DigitalInOut(board.GP4)                        # LED bonded to LOAD_EN
@@ -87,6 +90,12 @@ params = {
     # Added parameters for load cutoff on voltage
     "LOAD_TRIP_V":   8.5,       # Voltage cutoff threshold (V)
     "HYST_V":        0.5,       # Voltage hysteresis (V)
+
+    # NEW: Fan presence checking / LED blink
+    "FAN_CHECK_MIN_DUTY": 0.30,   # Only check tach when commanded duty >= this
+    "FAN_SPINUP_MS":     1500,    # Grace after starting fan before checking
+    "FAN_TACH_TIMEOUT_MS": 600,   # Fault if no edge seen within this window
+    "LED_BLINK_MS":       300,    # Blink period when in fan-fault
 }
 
 # -------------------------------
@@ -108,6 +117,8 @@ last_fast_ns = time.monotonic_ns()
 # Fan & load states
 lut_index = 0
 load_enabled = True
+base_load_enabled = True  # NEW: temp/VIN policy before fan interlock
+fan_fault = False         # NEW: fan fault flag
 
 # Fan ramp
 duty_target = 0.0
@@ -120,6 +131,13 @@ fan_manual = False  # set true by FAN DUTY; unset by FAN AUTO
 
 # Telemetry
 last_telem_ms = 0
+
+# NEW: Fan tach / LED blink state
+last_tach_val = False
+last_tach_edge_ms = 0
+fan_spin_request_ms = 0
+last_led_blink_ms = 0
+led_blink_state = False
 
 # -------------------------------
 # Utility functions
@@ -236,12 +254,18 @@ def set_fan_target(new_target: float, now_ms: int) -> None:
         new_target: target duty in [0.0, 1.0].
         now_ms: monotonic time in milliseconds.
     """
-    global ramp_start_duty, ramp_target, ramp_start_ms, duty_cmd
+    global ramp_start_duty, ramp_target, ramp_start_ms, duty_cmd, fan_spin_request_ms
     new_target = clamp(new_target, 0.0, 1.0)
     if new_target != ramp_target:
         ramp_start_duty = duty_cmd
         ramp_target = new_target
         ramp_start_ms = now_ms
+    # NEW: Track spin request start for tach checking
+    if new_target >= params["FAN_CHECK_MIN_DUTY"]:
+        if fan_spin_request_ms == 0:
+            fan_spin_request_ms = now_ms
+    else:
+        fan_spin_request_ms = 0
 
 
 def service_fan_ramp(now_ms: int) -> None:
@@ -440,6 +464,11 @@ def load_defaults_ram():
             "VIN_CAL_B": 0.0,
             "LOAD_TRIP_V": 8.5,   # Default voltage cutoff
             "HYST_V": 0.5,        # Default voltage hysteresis
+            # NEW advanced (not exposed in GUI by default)
+            "FAN_CHECK_MIN_DUTY": 0.30,
+            "FAN_SPINUP_MS":     1500,
+            "FAN_TACH_TIMEOUT_MS": 600,
+            "LED_BLINK_MS":       300,
         }
     )
     TEMP_TO_DUTY[:] = [(float(t), float(d)) for (t, d) in TEMP_TO_DUTY_BOOT]
@@ -486,6 +515,11 @@ class Backend:
             "TEMP_CAL_B",
             "VIN_CAL_A",
             "VIN_CAL_B",
+            # NEW advanced (not exposed in GUI by default)
+            "FAN_CHECK_MIN_DUTY",
+            "FAN_SPINUP_MS",
+            "FAN_TACH_TIMEOUT_MS",
+            "LED_BLINK_MS",
         ]
         for k in keys:
             lines.append("{}={}".format(k, params[k]))
@@ -495,7 +529,8 @@ class Backend:
         """Set a parameter from text (type inferred by key)."""
         if key not in params:
             raise KeyError("UNKNOWN_KEY")
-        if key in ("FAST_DT_MS", "SLOW_DT_MS", "RAMP_TIME_MS", "RAMP_STEP_MS", "TELEM_RATE_MS"):
+        if key in ("FAST_DT_MS", "SLOW_DT_MS", "RAMP_TIME_MS", "RAMP_STEP_MS", "TELEM_RATE_MS",
+                   "FAN_SPINUP_MS", "FAN_TACH_TIMEOUT_MS", "LED_BLINK_MS"):
             params[key] = int(float(value))
         elif key == "TELEM_FORMAT":
             v = value.strip().upper()
@@ -538,13 +573,15 @@ class Backend:
 
     def fan_duty(self, d: float) -> None:
         """Set manual fan target duty (ramps)."""
-        global fan_manual, ramp_target, ramp_start_duty, ramp_start_ms, duty_cmd
+        global fan_manual, ramp_target, ramp_start_duty, ramp_start_ms, duty_cmd, fan_spin_request_ms
         fan_manual = True
         now = now_ms()
         d = clamp(d, 0.0, 1.0)
         ramp_start_duty = duty_cmd
         ramp_target = d
         ramp_start_ms = now
+        # NEW: start spin request if above threshold
+        fan_spin_request_ms = now if d >= params["FAN_CHECK_MIN_DUTY"] else 0
 
     def telem_rate(self, ms: int) -> None:
         """Set telemetry period in ms (0 = off)."""
@@ -591,6 +628,10 @@ last_telem_ms = t_fast
 last_ramp_ms = t_fast
 ramp_start_ms = t_fast
 last_temp_c = 25.0
+# NEW: initialize tach/blink timers
+last_tach_edge_ms = t_fast
+last_led_blink_ms = t_fast
+last_tach_val = fan_tach.value
 
 # -------------------------------
 # UART server
@@ -640,15 +681,44 @@ while True:
         # Ramp to target
         service_fan_ramp(t)
 
-        # Load cutoff with hysteresis; LED bonded
-        if load_enabled:
-            if last_temp_c >= params["LOAD_TRIP_C"] and vin_v < (params["LOAD_TRIP_V"]- params["HYST_V"]):
-                load_enabled = False
+        # NEW: Fan tach monitoring & fault detection
+        cur_tach = fan_tach.value
+        if cur_tach != last_tach_val:
+            last_tach_val = cur_tach
+            last_tach_edge_ms = t
+
+        should_check_fan = (ramp_target >= params["FAN_CHECK_MIN_DUTY"]) or (duty_cmd >= params["FAN_CHECK_MIN_DUTY"]) or fan_manual
+        if not should_check_fan:
+            fan_fault = False
+            fan_spin_request_ms = 0
         else:
-            if last_temp_c <= (params["LOAD_TRIP_C"] - params["HYST_C"]) or vin_v >= params["LOAD_TRIP_V"]:
-                load_enabled = True
+            if fan_spin_request_ms == 0:
+                fan_spin_request_ms = t
+            if (t - fan_spin_request_ms) >= params["FAN_SPINUP_MS"]:
+                fan_fault = (t - last_tach_edge_ms) > params["FAN_TACH_TIMEOUT_MS"]
+            else:
+                fan_fault = False
+
+        # NEW: Base load policy with hysteresis (temp + VIN)
+        if base_load_enabled:
+            if (last_temp_c >= params["LOAD_TRIP_C"]) and (vin_v < (params["LOAD_TRIP_V"] - params["HYST_V"])):
+                base_load_enabled = False
+        else:
+            if (last_temp_c <= (params["LOAD_TRIP_C"] - params["HYST_C"])) or (vin_v >= params["LOAD_TRIP_V"]):
+                base_load_enabled = True
+
+        # NEW: Apply fan interlock: no fan → no load
+        load_enabled = base_load_enabled and (not fan_fault)
         load_en.value = load_enabled
-        led.value = load_enabled
+
+        # NEW: LED blinking on fan fault, else mirror LOAD_EN
+        if fan_fault and should_check_fan:
+            if (t - last_led_blink_ms) >= params["LED_BLINK_MS"]:
+                last_led_blink_ms = t
+                led_blink_state = not led_blink_state
+            led.value = led_blink_state
+        else:
+            led.value = load_enabled
 
     # 3) Telemetry (OFF by default)
     if params["TELEM_RATE_MS"] > 0 and (t - last_telem_ms >= params["TELEM_RATE_MS"]):

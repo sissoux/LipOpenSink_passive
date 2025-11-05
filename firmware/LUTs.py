@@ -42,9 +42,9 @@ ADC_TO_TEMP_5C = [
 # Fan PWM policy: thresholds (rising) mapped to duty fractions.
 # Hysteresis is handled in main code (±5°C around the current step).
 TEMP_TO_DUTY = [
-    (40.0, 0.30),
-    (55.0, 0.50),
-    (65.0, 0.70),
-    (70.0, 0.90),
+    (40.0, 0.35),
+    (50.0, 0.50),
+    (60.0, 0.65),
+    (70.0, 0.80),
     (75.0, 1.00),
 ]

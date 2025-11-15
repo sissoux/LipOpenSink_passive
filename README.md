@@ -13,6 +13,7 @@ Smart passive load add-on for the ToolkitRC M8D charger. Bridges Channel 1 → C
 - Load cutoff on over-temperature, with LED indicator
 - Optional VIN-based load cutoff with hysteresis (configurable)
 - Fan presence check via tach on GP12; interlock enforces "no fan → no load" with blinking LED
+- Broken temperature sensor safety: if NTC (high-side) reads unrealistically low (< -25°C), the load is opened
 - Settings persistence in RP2040 NVM (CRC-checked, adaptive to capacity)
 - USB configuration tool (CDC/serial) to edit parameters and view telemetry
 
@@ -74,6 +75,7 @@ In the GUI:
 - Select the serial port (CDC/COM) and Auto-Connect or Connect.
 - Use Refresh to load current parameters; adjust values and Apply; Save to flash when satisfied.
 - Live telemetry (CSV mode) is shown in the panel; you can set manual fan duty for testing.
+- Use Start Rec to log Temperature (°C) and fan duty (%) every 1 s; click Stop to choose where to save the CSV.
 
 Currently, the GUI focuses on parameters, telemetry, and basic calibration. LUT editing (upload/download) is supported by the device’s ASCII protocol but not yet exposed in the GUI.
 
@@ -116,8 +118,38 @@ Use a serial terminal to issue HELP for the exact command shapes (BEGIN/END bloc
 
 ---
 
+## Versioning & Breaking Changes
+
+The configuration GUI performs a firmware version check on connect. Minimum supported firmware: **v1.3.1**.
+
+| Area | Change | Firmware Version | GUI Impact |
+|------|--------|------------------|------------|
+| Safety | Added broken sensor low-temp safety (`BROKEN_TEMP_CUTOFF_C`, opens load if temp < -25°C) | 1.3.1 | Automatically enforced; no GUI control |
+| Voltage Policy | Independent VIN cutoff with hysteresis (`LOAD_TRIP_V`, `HYST_V`) | 1.3.1 | Editable in GUI |
+| Voltage Policy | Added VIN cutoff bypass parameter `BYPASS_VIN_CUTOFF` (1=bypass enabled) | 1.3.1 | Checkbox in GUI; hidden/disabled if firmware < 1.3.1 |
+| Telemetry | CSV telemetry expanded (includes load state, mode) | 1.3.1 | Parsed by GUI recorder |
+| GUI Logging | 1 Hz recording of Temperature & Fan Duty to CSV | (host feature) | Available regardless of firmware (needs CSV telemetry enabled) |
+| Fan Safety | Fan tach interlock & LED blink on fault | 1.3.1 | Enforced by firmware; no GUI control |
+
+If the firmware version is below the minimum, the GUI will:
+1. Show a warning dialog on connect.
+2. Disable controls for parameters not supported by the older firmware (e.g., `BYPASS_VIN_CUTOFF`).
+3. Skip applying unsupported parameters to avoid parse errors.
+
+### Upgrading Firmware
+
+1. Copy updated `code.py` (and optionally `boot.py`) to the `CIRCUITPY` drive.
+2. Power-cycle the RP2040.
+3. Reconnect with the GUI; ensure the status bar shows the new firmware version.
+
+### Legacy Behavior (< 1.3.1)
+
+- VIN cutoff bypass not available; VIN cutoff may behave differently (combined with temperature logic).
+- Broken sensor protection absent (extremely low temps might not force load open).
+- Fan tach/LED fault logic absent; load may remain enabled even if fan stalls.
+
 ## Notes
 
-- Firmware v1.3.0 monitors a Power-Good input but does not gate the load from it; load enable is controlled by temperature and VIN thresholds.
+- Firmware v1.3.1 monitors a Power-Good input but does not gate the load from it; load enable is controlled by temperature and VIN thresholds.
 - Set the ToolkitRC M8D to discharge/bridge as per its documentation.
 - Validate thermal performance for your specific mechanical design and environment before full-power operation.

@@ -1,3 +1,7 @@
+# Licensed under CERN-OHL-S-2.0
+# © 2025 ADSTech [e-ddy]
+# https://ohwr.org/licences/
+
 """
 uart_cmd.py — Dual-CDC UART + command server for LipOpenSink_Passive.
 

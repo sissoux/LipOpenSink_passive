@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConstraintsData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <FlattenedNetName2ConstraintNetId>
+    <FlattenedNetName2ConstraintNetIdEntry FlattenedNetName="PGND" ConstraintNetId="d963cc7b-792b-4fc2-9ad5-20f6af86155a" />
+    <FlattenedNetName2ConstraintNetIdEntry FlattenedNetName="USB_Dat_x_p" ConstraintNetId="de0f71eb-77a1-4566-86d5-165c4e4a436b" />
+    <FlattenedNetName2ConstraintNetIdEntry FlattenedNetName="USB_Dat_x_n" ConstraintNetId="95a32cb9-5613-44be-9886-16e00fa74259" />
+    <FlattenedNetName2ConstraintNetIdEntry FlattenedNetName="USB_Dat_p" ConstraintNetId="6d7f2942-1cf7-4cb6-b395-bf615ca3d6f8" />
+    <FlattenedNetName2ConstraintNetIdEntry FlattenedNetName="USB_Dat_n" ConstraintNetId="20eea676-fcfc-4cd0-a25e-9ffc1d65ef35" />
+  </FlattenedNetName2ConstraintNetId>
+  <CNets>
+    <CNet Id="d963cc7b-792b-4fc2-9ad5-20f6af86155a">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <ConstraintNodes />
+    </CNet>
+    <CNet Id="de0f71eb-77a1-4566-86d5-165c4e4a436b">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <ConstraintNodes />
+    </CNet>
+    <CNet Id="95a32cb9-5613-44be-9886-16e00fa74259">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <ConstraintNodes />
+    </CNet>
+    <CNet Id="6d7f2942-1cf7-4cb6-b395-bf615ca3d6f8">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <ConstraintNodes />
+    </CNet>
+    <CNet Id="20eea676-fcfc-4cd0-a25e-9ffc1d65ef35">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <ConstraintNodes />
+    </CNet>
+  </CNets>
+  <CNetClasses>
+    <CNetClass Id="3d6d9548-b117-4ec2-bfaa-d7d2f46aa444" Name="All Nets" IsPredefined="true" Domain="2">
+      <Constraints>
+        <Constraint Id="e57c5358-0cba-4606-8785-b94639d3e7ee" Kind="2" Name="Width" Comment="" Description="Width Constraint [Pref Width = 0.2mm    Min Width = 0.12mm    Max Width = 1.5mm]" Scope1="All" Scope2="All" Attributes="NETSCOPE=AnyNet|LAYERKIND=SameLayer|MAXLIMIT=59.0551mil|MINLIMIT=4.7244mil|PREFEREDWIDTH=7.874mil|MIDLAYER3_MINWIDTH=10mil|MIDLAYER3_MAXWIDTH=10mil|MIDLAYER3_PREFWIDTH=10mil|MIDLAYER4_MINWIDTH=10mil|MIDLAYER4_MAXWIDTH=10mil|MIDLAYER4_PREFWIDTH=10mil|MIDLAYER5_MINWIDTH=10mil|MIDLAYER5_MAXWIDTH=10mil|MIDLAYER5_PREFWIDTH=10mil|MIDLAYER6_MINWIDTH=10mil|MIDLAYER6_MAXWIDTH=10mil|MIDLAYER6_PREFWIDTH=10mil|MIDLAYER7_MINWIDTH=10mil|MIDLAYER7_MAXWIDTH=10mil|MIDLAYER7_PREFWIDTH=10mil|MIDLAYER8_MINWIDTH=10mil|MIDLAYER8_MAXWIDTH=10mil|MIDLAYER8_PREFWIDTH=10mil|MIDLAYER9_MINWIDTH=10mil|MIDLAYER9_MAXWIDTH=10mil|MIDLAYER9_PREFWIDTH=10mil|MIDLAYER10_MINWIDTH=10mil|MIDLAYER10_MAXWIDTH=10mil|MIDLAYER10_PREFWIDTH=10mil|MIDLAYER11_MINWIDTH=10mil|MIDLAYER11_MAXWIDTH=10mil|MIDLAYER11_PREFWIDTH=10mil|MIDLAYER12_MINWIDTH=10mil|MIDLAYER12_MAXWIDTH=10mil|MIDLAYER12_PREFWIDTH=10mil|MIDLAYER13_MINWIDTH=10mil|MIDLAYER13_MAXWIDTH=10mil|MIDLAYER13_PREFWIDTH=10mil|MIDLAYER14_MINWIDTH=10mil|MIDLAYER14_MAXWIDTH=10mil|MIDLAYER14_PREFWIDTH=10mil|MIDLAYER15_MINWIDTH=10mil|MIDLAYER15_MAXWIDTH=10mil|MIDLAYER15_PREFWIDTH=10mil|MIDLAYER16_MINWIDTH=10mil|MIDLAYER16_MAXWIDTH=10mil|MIDLAYER16_PREFWIDTH=10mil|MIDLAYER17_MINWIDTH=10mil|MIDLAYER17_MAXWIDTH=10mil|MIDLAYER17_PREFWIDTH=10mil|MIDLAYER18_MINWIDTH=10mil|MIDLAYER18_MAXWIDTH=10mil|MIDLAYER18_PREFWIDTH=10mil|MIDLAYER19_MINWIDTH=10mil|MIDLAYER19_MAXWIDTH=10mil|MIDLAYER19_PREFWIDTH=10mil|MIDLAYER20_MINWIDTH=10mil|MIDLAYER20_MAXWIDTH=10mil|MIDLAYER20_PREFWIDTH=10mil|MIDLAYER21_MINWIDTH=10mil|MIDLAYER21_MAXWIDTH=10mil|MIDLAYER21_PREFWIDTH=10mil|MIDLAYER22_MINWIDTH=10mil|MIDLAYER22_MAXWIDTH=10mil|MIDLAYER22_PREFWIDTH=10mil|MIDLAYER23_MINWIDTH=10mil|MIDLAYER23_MAXWIDTH=10mil|MIDLAYER23_PREFWIDTH=10mil|MIDLAYER24_MINWIDTH=10mil|MIDLAYER24_MAXWIDTH=10mil|MIDLAYER24_PREFWIDTH=10mil|MIDLAYER25_MINWIDTH=10mil|MIDLAYER25_MAXWIDTH=10mil|MIDLAYER25_PREFWIDTH=10mil|MIDLAYER26_MINWIDTH=10mil|MIDLAYER26_MAXWIDTH=10mil|MIDLAYER26_PREFWIDTH=10mil|MIDLAYER27_MINWIDTH=10mil|MIDLAYER27_MAXWIDTH=10mil|MIDLAYER27_PREFWIDTH=10mil|MIDLAYER28_MINWIDTH=10mil|MIDLAYER28_MAXWIDTH=10mil|MIDLAYER28_PREFWIDTH=10mil|MIDLAYER29_MINWIDTH=10mil|MIDLAYER29_MAXWIDTH=10mil|MIDLAYER29_PREFWIDTH=10mil|MIDLAYER30_MINWIDTH=10mil|MIDLAYER30_MAXWIDTH=10mil|MIDLAYER30_PREFWIDTH=10mil|MINIMP=50.000000|MAXIMP=50.000000|FAVIMP=50.000000|DOC=Bridge Load V2.PcbDoc" />
+        <Constraint Id="f530dc58-f598-43f5-8482-78fdecd9e975" Kind="7" Name="Schematic Routing Topology" Comment="" Description="Routing Topology [Topology - Shortest]" Scope1="All" Scope2="All" Attributes="NETSCOPE=AnyNet|LAYERKIND=SameLayer|TOPOLOGY=Shortest" />
+        <Constraint Id="b632b9d5-83af-43e9-ba8f-694912b167fd" Kind="9" Name="Schematic Routing Layers" Comment="" Description="Routing Layers [TopLayer - Enabled BottomLayer - Enabled ]" Scope1="All" Scope2="All" Attributes="NETSCOPE=AnyNet|LAYERKIND=SameLayer|TOP LAYER_V5=TRUE|MID LAYER 1_V5=TRUE|MID LAYER 2_V5=TRUE|MID LAYER 3_V5=TRUE|MID LAYER 4_V5=TRUE|MID LAYER 5_V5=TRUE|MID LAYER 6_V5=TRUE|MID LAYER 7_V5=TRUE|MID LAYER 8_V5=TRUE|MID LAYER 9_V5=TRUE|MID LAYER 10_V5=TRUE|MID LAYER 11_V5=TRUE|MID LAYER 12_V5=TRUE|MID LAYER 13_V5=TRUE|MID LAYER 14_V5=TRUE|MID LAYER 15_V5=TRUE|MID LAYER 16_V5=TRUE|MID LAYER 17_V5=TRUE|MID LAYER 18_V5=TRUE|MID LAYER 19_V5=TRUE|MID LAYER 20_V5=TRUE|MID LAYER 21_V5=TRUE|MID LAYER 22_V5=TRUE|MID LAYER 23_V5=TRUE|MID LAYER 24_V5=TRUE|MID LAYER 25_V5=TRUE|MID LAYER 26_V5=TRUE|MID LAYER 27_V5=TRUE|MID LAYER 28_V5=TRUE|MID LAYER 29_V5=TRUE|MID LAYER 30_V5=TRUE|BOTTOM LAYER_V5=TRUE" />
+        <Constraint Id="844342e9-acd5-4ccf-986e-b29974bf2b0d" Kind="11" Name="RoutingVias" Comment="" Description="Routing Via Style [Templates Used: v45h30m0mx0_2670034071, v60h30m0mx0_2670034071]" Scope1="All" Scope2="All" Attributes="NETSCOPE=AnyNet|LAYERKIND=SameLayer|HOLEWIDTH=11.811mil|WIDTH=23.622mil|VIASTYLE=Through Hole|MINHOLEWIDTH=11.811mil|MINWIDTH=23.622mil|MAXHOLEWIDTH=11.811mil|MAXWIDTH=23.622mil|USEVIATEMPLATES=TRUE|VIATEMPLATEGUID#1={3787408C-D00B-4614-B16F-61B7CC94B26D}|VIATEMPLATEGUID#2={0EDF9C37-06F4-4FEF-86F3-32FFE9F7B98E}|VIATEMPLATEGUID#3={6397EC33-1DCF-48FF-96F1-210B1DA792D7}|VIATEMPLATENAME#1=v45h30m0mx0_2670034071|VIATEMPLATENAME#2=v60h30m0mx0_2670034071|VIATEMPLATENAME#3=v60h30m0mx0|DOC=Bridge Load V2.PcbDoc" />
+        <Constraint Id="7b2f6946-1e3d-4424-a4f7-775a30bde74f" Kind="20" Name="PolygonConnect" Comment="" Description="Polygon Connect Style [Style - Direct Connect]" Scope1="All" Scope2="All" Attributes="NETSCOPE=AnyNet|LAYERKIND=SameLayer|CONNECTSTYLE=Direct|RELIEFCONDUCTORWIDTH=10mil|RELIEFENTRIES=4|POLYGONRELIEFANGLE=90 Angle|AIRGAPWIDTH=10mil|DOC=Bridge Load V2.PcbDoc" />
+        <Constraint Id="0c4d0ff3-143d-440a-b98c-873c277b605e" Kind="51" Name="Schematic Differential Pairs Routing" Comment="" Description="Differential Pairs Routing [Pref Gap = 10mil    Min Gap  = 10mil    Max Gap  = 10milPref Width = 15mil    Min Width  = 15mil    Max Width  = 15mil]" Scope1="All" Scope2="All" Attributes="NETSCOPE=AnyNet|LAYERKIND=SameLayer|MAXLIMIT=10mil|MINLIMIT=10mil|MOSTFREQGAP=10mil|TOPLAYER_MINWIDTH=15mil|TOPLAYER_MAXWIDTH=15mil|TOPLAYER_PREFWIDTH=15mil|MIDLAYER1_MINWIDTH=15mil|MIDLAYER1_MAXWIDTH=15mil|MIDLAYER1_PREFWIDTH=15mil|MIDLAYER2_MINWIDTH=15mil|MIDLAYER2_MAXWIDTH=15mil|MIDLAYER2_PREFWIDTH=15mil|MIDLAYER3_MINWIDTH=15mil|MIDLAYER3_MAXWIDTH=15mil|MIDLAYER3_PREFWIDTH=15mil|MIDLAYER4_MINWIDTH=15mil|MIDLAYER4_MAXWIDTH=15mil|MIDLAYER4_PREFWIDTH=15mil|MIDLAYER5_MINWIDTH=15mil|MIDLAYER5_MAXWIDTH=15mil|MIDLAYER5_PREFWIDTH=15mil|MIDLAYER6_MINWIDTH=15mil|MIDLAYER6_MAXWIDTH=15mil|MIDLAYER6_PREFWIDTH=15mil|MIDLAYER7_MINWIDTH=15mil|MIDLAYER7_MAXWIDTH=15mil|MIDLAYER7_PREFWIDTH=15mil|MIDLAYER8_MINWIDTH=15mil|MIDLAYER8_MAXWIDTH=15mil|MIDLAYER8_PREFWIDTH=15mil|MIDLAYER9_MINWIDTH=15mil|MIDLAYER9_MAXWIDTH=15mil|MIDLAYER9_PREFWIDTH=15mil|MIDLAYER10_MINWIDTH=15mil|MIDLAYER10_MAXWIDTH=15mil|MIDLAYER10_PREFWIDTH=15mil|MIDLAYER11_MINWIDTH=15mil|MIDLAYER11_MAXWIDTH=15mil|MIDLAYER11_PREFWIDTH=15mil|MIDLAYER12_MINWIDTH=15mil|MIDLAYER12_MAXWIDTH=15mil|MIDLAYER12_PREFWIDTH=15mil|MIDLAYER13_MINWIDTH=15mil|MIDLAYER13_MAXWIDTH=15mil|MIDLAYER13_PREFWIDTH=15mil|MIDLAYER14_MINWIDTH=15mil|MIDLAYER14_MAXWIDTH=15mil|MIDLAYER14_PREFWIDTH=15mil|MIDLAYER15_MINWIDTH=15mil|MIDLAYER15_MAXWIDTH=15mil|MIDLAYER15_PREFWIDTH=15mil|MIDLAYER16_MINWIDTH=15mil|MIDLAYER16_MAXWIDTH=15mil|MIDLAYER16_PREFWIDTH=15mil|MIDLAYER17_MINWIDTH=15mil|MIDLAYER17_MAXWIDTH=15mil|MIDLAYER17_PREFWIDTH=15mil|MIDLAYER18_MINWIDTH=15mil|MIDLAYER18_MAXWIDTH=15mil|MIDLAYER18_PREFWIDTH=15mil|MIDLAYER19_MINWIDTH=15mil|MIDLAYER19_MAXWIDTH=15mil|MIDLAYER19_PREFWIDTH=15mil|MIDLAYER20_MINWIDTH=15mil|MIDLAYER20_MAXWIDTH=15mil|MIDLAYER20_PREFWIDTH=15mil|MIDLAYER21_MINWIDTH=15mil|MIDLAYER21_MAXWIDTH=15mil|MIDLAYER21_PREFWIDTH=15mil|MIDLAYER22_MINWIDTH=15mil|MIDLAYER22_MAXWIDTH=15mil|MIDLAYER22_PREFWIDTH=15mil|MIDLAYER23_MINWIDTH=15mil|MIDLAYER23_MAXWIDTH=15mil|MIDLAYER23_PREFWIDTH=15mil|MIDLAYER24_MINWIDTH=15mil|MIDLAYER24_MAXWIDTH=15mil|MIDLAYER24_PREFWIDTH=15mil|MIDLAYER25_MINWIDTH=15mil|MIDLAYER25_MAXWIDTH=15mil|MIDLAYER25_PREFWIDTH=15mil|MIDLAYER26_MINWIDTH=15mil|MIDLAYER26_MAXWIDTH=15mil|MIDLAYER26_PREFWIDTH=15mil|MIDLAYER27_MINWIDTH=15mil|MIDLAYER27_MAXWIDTH=15mil|MIDLAYER27_PREFWIDTH=15mil|MIDLAYER28_MINWIDTH=15mil|MIDLAYER28_MAXWIDTH=15mil|MIDLAYER28_PREFWIDTH=15mil|MIDLAYER29_MINWIDTH=15mil|MIDLAYER29_MAXWIDTH=15mil|MIDLAYER29_PREFWIDTH=15mil|MIDLAYER30_MINWIDTH=15mil|MIDLAYER30_MAXWIDTH=15mil|MIDLAYER30_PREFWIDTH=15mil|BOTTOMLAYER_MINWIDTH=15mil|BOTTOMLAYER_MAXWIDTH=15mil|BOTTOMLAYER_PREFWIDTH=15mil|MAXUNCOUPLEDLENGTH=500mil" />
+      </Constraints>
+      <ConstraintsEx />
+      <ConstraintSets />
+      <CNets />
+      <ObservedDirectiveParamsUniqueIds />
+    </CNetClass>
+    <CNetClass Id="6abddbcd-fa5e-4b99-8da2-11f409308009" Name="PGND" IsPredefined="false" Domain="0">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <CNets>
+        <CNet Id="d963cc7b-792b-4fc2-9ad5-20f6af86155a" />
+      </CNets>
+      <ObservedDirectiveParamsUniqueIds />
+    </CNetClass>
+  </CNetClasses>
+  <CDifferentialPairs>
+    <CDifferentialPair Id="f8b53805-f63e-4d5b-9839-cab3531a7988" Name="D_USB_Dat_x">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <PositiveConstraintNet Id="de0f71eb-77a1-4566-86d5-165c4e4a436b" />
+      <NegativeConstraintNet Id="95a32cb9-5613-44be-9886-16e00fa74259" />
+      <ObservedDirectiveParamsUniqueIds />
+    </CDifferentialPair>
+    <CDifferentialPair Id="618bd65e-9994-4de5-b6ca-01836bb6b8b3" Name="D_USB_Dat">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <PositiveConstraintNet Id="6d7f2942-1cf7-4cb6-b395-bf615ca3d6f8" />
+      <NegativeConstraintNet Id="20eea676-fcfc-4cd0-a25e-9ffc1d65ef35" />
+      <ObservedDirectiveParamsUniqueIds />
+    </CDifferentialPair>
+  </CDifferentialPairs>
+  <CDifferentialPairClasses>
+    <CDifferentialPairClass Id="61c3f147-9b6a-48e6-90fe-92be9bc46460" Name="All Differential Pairs" IsPredefined="true">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <CDifferentialPairs />
+      <ObservedDirectiveParamsUniqueIds />
+    </CDifferentialPairClass>
+    <CDifferentialPairClass Id="f7e861c6-6e88-4695-b66d-c6a549562ad2" Name="USB (Diff90)" IsPredefined="false">
+      <Constraints>
+        <Constraint Id="7222848c-e36f-4dbf-b87c-49a3e2c653a6" Kind="51" Name="DifferentialPairsRouting_1" Comment="" Description="Differential Pairs Routing [Pref Gap = 0.254mm    Min Gap  = 0.127mm    Max Gap  = 0.254mmPref Width = 0.381mm    Min Width  = 0.198mm    Max Width  = 0.381mm]" Scope1="InDifferentialPairClass('USB (Diff90)')" Scope2="All" Attributes="NETSCOPE=AnyNet|LAYERKIND=SameLayer|MAXLIMIT=10mil|MINLIMIT=4.9926mil|MOSTFREQGAP=10mil|TOPLAYER_MAXGAP=4.9926mil|TOPLAYER_PREFGAP=4.9926mil|TOPLAYER_MINWIDTH=7.8124mil|TOPLAYER_MAXWIDTH=7.8124mil|TOPLAYER_PREFWIDTH=7.8124mil|BOTTOMLAYER_MAXGAP=4.9926mil|BOTTOMLAYER_PREFGAP=4.9926mil|BOTTOMLAYER_MINWIDTH=7.8124mil|BOTTOMLAYER_MAXWIDTH=7.8124mil|BOTTOMLAYER_PREFWIDTH=7.8124mil|IMPEDANCEPROFILEDRIVEN=TRUE|IMPEDANCEPROFILEID={813BF28A-41A8-40D2-A99F-F099821C9485}|IMPEDANCEPROFILEVALUE=90.000000|MAXUNCOUPLEDLENGTH=500mil|DOC=Bridge Load V2.PcbDoc" />
+      </Constraints>
+      <ConstraintsEx />
+      <ConstraintSets />
+      <CDifferentialPairs>
+        <CDifferentialPair Id="618bd65e-9994-4de5-b6ca-01836bb6b8b3" />
+        <CDifferentialPair Id="f8b53805-f63e-4d5b-9839-cab3531a7988" />
+      </CDifferentialPairs>
+      <ObservedDirectiveParamsUniqueIds />
+    </CDifferentialPairClass>
+  </CDifferentialPairClasses>
+  <CPinPairs />
+  <CxSigClasses />
+  <CxNets />
+  <CXNetClasses>
+    <CXNetClass Id="9d289b68-b00b-44e3-a5ea-a4bc3b14ded9" Name="All xNets" IsPredefined="true">
+      <Constraints />
+      <ConstraintsEx />
+      <ConstraintSets />
+      <CXNets />
+    </CXNetClass>
+  </CXNetClasses>
+  <ConstraintClearancesMatrix>
+    <CCMFromScopes>
+      <CCMFromScope Id="d983e15c-7b05-42ba-bb97-2849dec1b810">
+        <ConstraintObject Id="00000000-0000-0000-0000-000000000000" />
+        <CCMToScopes>
+          <CCMToScope Id="01330eae-ebe1-46ea-837c-d40b532a8236" SetId="00000000-0000-0000-0000-000000000000">
+            <ConstraintObject Id="00000000-0000-0000-0000-000000000000" />
+            <DefaultConstraintClearancesMatrixConstraint Id="00000000-0000-0000-0000-000000000000" Kind="0" Comment="" Description="" Attributes="" LayerType="0" LayerId="0" />
+            <CCMConstraints>
+              <CCMConstraint Id="6c6c5364-da8a-42c0-a891-8f07297f58ec" Kind="0" Name="Clearance_1" Comment="" Description="Clearance Constraint [Generic clearance = 0.15mm, and 2 value(s) for objects]" Scope1="(ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Scope2="(ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=5.9055mil|GENERICCLEARANCE=5.9055mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_SMDPad-ClearanceObj_SMDPad:47244;ClearanceObj_SMDPad-ClearanceObj_THPad:47244|DOC=Bridge Load V2.PcbDoc" LayerType="2" LayerId="0" />
+              <CCMConstraint Id="3b880e8d-d2c9-42f0-b258-5bc8175b949f" Kind="0" Name="Clearance_2" Comment="" Description="Clearance Constraint [Generic clearance = 0.15mm, and 2 value(s) for objects]" Scope1="(ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Scope2="(ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=5.9055mil|GENERICCLEARANCE=5.9055mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_SMDPad-ClearanceObj_SMDPad:47244;ClearanceObj_SMDPad-ClearanceObj_THPad:47244|DOC=Bridge Load V2.PcbDoc" LayerType="1" LayerId="0" />
+            </CCMConstraints>
+          </CCMToScope>
+          <CCMToScope Id="6fe73568-b0cb-4a55-bae2-707463788618" SetId="00000000-0000-0000-0000-000000000000">
+            <ConstraintObject Id="6abddbcd-fa5e-4b99-8da2-11f409308009" />
+            <DefaultConstraintClearancesMatrixConstraint Id="00000000-0000-0000-0000-000000000000" Kind="0" Comment="" Description="" Attributes="" LayerType="0" LayerId="0" />
+            <CCMConstraints>
+              <CCMConstraint Id="b80c053b-9989-4f96-bf77-dde59474d2cf" Kind="0" Name="Clearance_1" Comment="" Description="Clearance Constraint [Generic clearance = 0.35mm, and 1 value(s) for objects]" Scope1="InNetClass('PGND') And (ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Scope2="(ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=13.7795mil|GENERICCLEARANCE=13.7795mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_SMDPad-ClearanceObj_SMDPad:78740|DOC=Bridge Load V2.PcbDoc" LayerType="2" LayerId="0" />
+              <CCMConstraint Id="5f3c6ba8-848c-4a26-adab-a43bae176a6c" Kind="0" Name="Clearance_2" Comment="" Description="Clearance Constraint [Generic clearance = 0.35mm, and 1 value(s) for objects]" Scope1="InNetClass('PGND') And (ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Scope2="(ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=13.7795mil|GENERICCLEARANCE=13.7795mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_SMDPad-ClearanceObj_SMDPad:78740|DOC=Bridge Load V2.PcbDoc" LayerType="1" LayerId="0" />
+            </CCMConstraints>
+          </CCMToScope>
+          <CCMToScope Id="d20af21a-eb29-413c-9b80-6992010fa326" SetId="00000000-0000-0000-0000-000000000000">
+            <ConstraintObject Id="f7e861c6-6e88-4695-b66d-c6a549562ad2" />
+            <DefaultConstraintClearancesMatrixConstraint Id="00000000-0000-0000-0000-000000000000" Kind="0" Comment="" Description="" Attributes="" LayerType="0" LayerId="0" />
+            <CCMConstraints>
+              <CCMConstraint Id="b67ac08a-8a74-4a28-bfa3-244def4788d8" Kind="0" Name="Clearance_1" Comment="" Description="Clearance Constraint [Generic clearance = 0.15mm, and 20 value(s) for objects]" Scope1="InDifferentialPairClass('USB (Diff90)') And (ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Scope2="(ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=5.9055mil|GENERICCLEARANCE=5.9055mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_Arc-ClearanceObj_Fill:137795;ClearanceObj_Arc-ClearanceObj_Poly:137795;ClearanceObj_Arc-ClearanceObj_Region:137795;ClearanceObj_Track-ClearanceObj_Fill:137795;ClearanceObj_Track-ClearanceObj_Poly:137795;ClearanceObj_Track-ClearanceObj_Region:137795;ClearanceObj_SMDPad-ClearanceObj_SMDPad:47244;ClearanceObj_SMDPad-ClearanceObj_THPad:47244;ClearanceObj_SMDPad-ClearanceObj_Fill:137795;ClearanceObj_SMDPad-ClearanceObj_Poly:137795;ClearanceObj_SMDPad-ClearanceObj_Region:137795;ClearanceObj_THPad-ClearanceObj_Fill:137795;ClearanceObj_THPad-ClearanceObj_Poly:137795;ClearanceObj_THPad-ClearanceObj_Region:137795;ClearanceObj_Via-ClearanceObj_Fill:137795;ClearanceObj_Via-ClearanceObj_Poly:137795;ClearanceObj_Via-ClearanceObj_Region:137795;ClearanceObj_Fill-ClearanceObj_Text:137795;ClearanceObj_Poly-ClearanceObj_Text:137795;ClearanceObj_Region-ClearanceObj_Text:137795|DOC=Bridge Load V2.PcbDoc" LayerType="2" LayerId="0" />
+              <CCMConstraint Id="67161986-5800-403f-bf00-647cd8fdc8df" Kind="0" Name="Clearance_2" Comment="" Description="Clearance Constraint [Generic clearance = 0.15mm, and 20 value(s) for objects]" Scope1="InDifferentialPairClass('USB (Diff90)') And (ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Scope2="(ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=5.9055mil|GENERICCLEARANCE=5.9055mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_Arc-ClearanceObj_Fill:137795;ClearanceObj_Arc-ClearanceObj_Poly:137795;ClearanceObj_Arc-ClearanceObj_Region:137795;ClearanceObj_Track-ClearanceObj_Fill:137795;ClearanceObj_Track-ClearanceObj_Poly:137795;ClearanceObj_Track-ClearanceObj_Region:137795;ClearanceObj_SMDPad-ClearanceObj_SMDPad:47244;ClearanceObj_SMDPad-ClearanceObj_THPad:47244;ClearanceObj_SMDPad-ClearanceObj_Fill:137795;ClearanceObj_SMDPad-ClearanceObj_Poly:137795;ClearanceObj_SMDPad-ClearanceObj_Region:137795;ClearanceObj_THPad-ClearanceObj_Fill:137795;ClearanceObj_THPad-ClearanceObj_Poly:137795;ClearanceObj_THPad-ClearanceObj_Region:137795;ClearanceObj_Via-ClearanceObj_Fill:137795;ClearanceObj_Via-ClearanceObj_Poly:137795;ClearanceObj_Via-ClearanceObj_Region:137795;ClearanceObj_Fill-ClearanceObj_Text:137795;ClearanceObj_Poly-ClearanceObj_Text:137795;ClearanceObj_Region-ClearanceObj_Text:137795|DOC=Bridge Load V2.PcbDoc" LayerType="1" LayerId="0" />
+            </CCMConstraints>
+          </CCMToScope>
+        </CCMToScopes>
+      </CCMFromScope>
+      <CCMFromScope Id="a589e112-f4b0-412a-aec3-d269073c4acd">
+        <ConstraintObject Id="6abddbcd-fa5e-4b99-8da2-11f409308009" />
+        <CCMToScopes>
+          <CCMToScope Id="d9cdf769-b957-43a3-b0c1-91f75d3d3c6e" SetId="00000000-0000-0000-0000-000000000000">
+            <ConstraintObject Id="00000000-0000-0000-0000-000000000000" />
+            <DefaultConstraintClearancesMatrixConstraint Id="00000000-0000-0000-0000-000000000000" Kind="0" Comment="" Description="" Attributes="" LayerType="0" LayerId="0" />
+            <CCMConstraints>
+              <CCMConstraint Id="64d65209-4340-476f-8cef-5fccc299fba3" Kind="0" Name="Clearance_1" Comment="" Description="Clearance Constraint [Generic clearance = 0.35mm, and 1 value(s) for objects]" Scope1="InNetClass('PGND') And (ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Scope2="(ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=13.7795mil|GENERICCLEARANCE=13.7795mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_SMDPad-ClearanceObj_SMDPad:78740|DOC=Bridge Load V2.PcbDoc" LayerType="2" LayerId="0" />
+              <CCMConstraint Id="de1240fc-9415-439f-826f-df595961293e" Kind="0" Name="Clearance_2" Comment="" Description="Clearance Constraint [Generic clearance = 0.35mm, and 1 value(s) for objects]" Scope1="InNetClass('PGND') And (ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Scope2="(ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=13.7795mil|GENERICCLEARANCE=13.7795mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_SMDPad-ClearanceObj_SMDPad:78740|DOC=Bridge Load V2.PcbDoc" LayerType="1" LayerId="0" />
+            </CCMConstraints>
+          </CCMToScope>
+        </CCMToScopes>
+      </CCMFromScope>
+      <CCMFromScope Id="74fe494a-6fa8-45d1-9506-9c9875e6bdc1">
+        <ConstraintObject Id="f7e861c6-6e88-4695-b66d-c6a549562ad2" />
+        <CCMToScopes>
+          <CCMToScope Id="af4f8c03-6c52-40ae-90df-a01dff4f5eb4" SetId="00000000-0000-0000-0000-000000000000">
+            <ConstraintObject Id="00000000-0000-0000-0000-000000000000" />
+            <DefaultConstraintClearancesMatrixConstraint Id="00000000-0000-0000-0000-000000000000" Kind="0" Comment="" Description="" Attributes="" LayerType="0" LayerId="0" />
+            <CCMConstraints>
+              <CCMConstraint Id="56e81007-0459-4418-8ef2-532d80ab0b9e" Kind="0" Name="Clearance_1" Comment="" Description="Clearance Constraint [Generic clearance = 0.15mm, and 20 value(s) for objects]" Scope1="InDifferentialPairClass('USB (Diff90)') And (ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Scope2="(ExistsOnLayer('Int1 (GND)') Or ExistsOnLayer('Int2 (PWR)'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=5.9055mil|GENERICCLEARANCE=5.9055mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_Arc-ClearanceObj_Fill:137795;ClearanceObj_Arc-ClearanceObj_Poly:137795;ClearanceObj_Arc-ClearanceObj_Region:137795;ClearanceObj_Track-ClearanceObj_Fill:137795;ClearanceObj_Track-ClearanceObj_Poly:137795;ClearanceObj_Track-ClearanceObj_Region:137795;ClearanceObj_SMDPad-ClearanceObj_SMDPad:47244;ClearanceObj_SMDPad-ClearanceObj_THPad:47244;ClearanceObj_SMDPad-ClearanceObj_Fill:137795;ClearanceObj_SMDPad-ClearanceObj_Poly:137795;ClearanceObj_SMDPad-ClearanceObj_Region:137795;ClearanceObj_THPad-ClearanceObj_Fill:137795;ClearanceObj_THPad-ClearanceObj_Poly:137795;ClearanceObj_THPad-ClearanceObj_Region:137795;ClearanceObj_Via-ClearanceObj_Fill:137795;ClearanceObj_Via-ClearanceObj_Poly:137795;ClearanceObj_Via-ClearanceObj_Region:137795;ClearanceObj_Fill-ClearanceObj_Text:137795;ClearanceObj_Poly-ClearanceObj_Text:137795;ClearanceObj_Region-ClearanceObj_Text:137795|DOC=Bridge Load V2.PcbDoc" LayerType="2" LayerId="0" />
+              <CCMConstraint Id="372bfab8-d1c8-4bcc-af7c-9ce0ae56d281" Kind="0" Name="Clearance_2" Comment="" Description="Clearance Constraint [Generic clearance = 0.15mm, and 20 value(s) for objects]" Scope1="InDifferentialPairClass('USB (Diff90)') And (ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Scope2="(ExistsOnLayer('Top Layer') Or ExistsOnLayer('Bottom Layer'))" Attributes="NETSCOPE=DifferentNets|LAYERKIND=SameLayer|GAP=5.9055mil|GENERICCLEARANCE=5.9055mil|IGNOREPADTOPADCLEARANCEINFOOTPRINT=FALSE|OBJECTCLEARANCES=ClearanceObj_Arc-ClearanceObj_Fill:137795;ClearanceObj_Arc-ClearanceObj_Poly:137795;ClearanceObj_Arc-ClearanceObj_Region:137795;ClearanceObj_Track-ClearanceObj_Fill:137795;ClearanceObj_Track-ClearanceObj_Poly:137795;ClearanceObj_Track-ClearanceObj_Region:137795;ClearanceObj_SMDPad-ClearanceObj_SMDPad:47244;ClearanceObj_SMDPad-ClearanceObj_THPad:47244;ClearanceObj_SMDPad-ClearanceObj_Fill:137795;ClearanceObj_SMDPad-ClearanceObj_Poly:137795;ClearanceObj_SMDPad-ClearanceObj_Region:137795;ClearanceObj_THPad-ClearanceObj_Fill:137795;ClearanceObj_THPad-ClearanceObj_Poly:137795;ClearanceObj_THPad-ClearanceObj_Region:137795;ClearanceObj_Via-ClearanceObj_Fill:137795;ClearanceObj_Via-ClearanceObj_Poly:137795;ClearanceObj_Via-ClearanceObj_Region:137795;ClearanceObj_Fill-ClearanceObj_Text:137795;ClearanceObj_Poly-ClearanceObj_Text:137795;ClearanceObj_Region-ClearanceObj_Text:137795|DOC=Bridge Load V2.PcbDoc" LayerType="1" LayerId="0" />
+            </CCMConstraints>
+          </CCMToScope>
+        </CCMToScopes>
+      </CCMFromScope>
+    </CCMFromScopes>
+  </ConstraintClearancesMatrix>
+  <ConstraintSameNetClearancesMatrix>
+    <CCMFromScopes />
+  </ConstraintSameNetClearancesMatrix>
+  <CSets />
+  <CClearancesMatrixSets />
+  <CCMCreepageConstraints />
+  <CImportedDirectiveUniqueIds>
+    <CImportedDirectiveUniqueId>FCPNRZRO</CImportedDirectiveUniqueId>
+    <CImportedDirectiveUniqueId>KYEDSCCF</CImportedDirectiveUniqueId>
+    <CImportedDirectiveUniqueId>YIQPSQCD</CImportedDirectiveUniqueId>
+    <CImportedDirectiveUniqueId>FCOOYXPC</CImportedDirectiveUniqueId>
+    <CImportedDirectiveUniqueId>NKUJRYKU</CImportedDirectiveUniqueId>
+    <CImportedDirectiveUniqueId>AAWVRUSE</CImportedDirectiveUniqueId>
+  </CImportedDirectiveUniqueIds>
+  <OtherConstraints />
+  <NetGroups />
+  <XNetDiffPairs />
+  <Settings UnitSystem="Imperial" />
+  <FileVersion MinorVersion="6">
+    <FileVersionInfo />
+  </FileVersion>
+</ConstraintsData>

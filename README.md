@@ -33,10 +33,20 @@ Smart passive load add-on for the ToolkitRC M8D charger. Bridges Channel 1 → C
 │   ├── config_gui.py       # Tkinter GUI: params, telemetry, calibration
 │   └── requirements.txt    # Dependencies for the GUI
 │
+├── PCB/                    # Hardware design (Altium) + outputs
+│   ├── SRC/                # Schematics, PCB project/files
+│   ├── FAB/                # Gerbers, drill, fabrication outputs
+│   ├── ASSY/               # BOM, pick-and-place
+│   └── 3D/                 # STEP and 3D PDF
+│
+├── tools/                  # Host-side helpers
+│   ├── Temperature Log Plotter.py  # Plot CSV telemetry (example)
+│   └── reports/            # Example logs and plots
+│
 └── README.md
 ```
 
-Note: Hardware CAD and 3D files are not included in this repository.
+Note: Hardware CAD and 3D outputs are provided under the license below.
 
 ---
 
@@ -111,10 +121,13 @@ Use a serial terminal to issue HELP for the exact command shapes (BEGIN/END bloc
 
 ---
 
-## Licenses
+## License
 
-- Firmware & Configuration Tool: MIT
-- Hardware and 3D files: not included in this repository
+Licensed under CERN-OHL-S-2.0
+
+© 2025 ADSTech [e-ddy]
+
+https://ohwr.org/licences/
 
 ---
 

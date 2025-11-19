@@ -1,3 +1,7 @@
+# Licensed under CERN-OHL-S-2.0
+# © 2025 ADSTech [e-ddy]
+# https://ohwr.org/licences/
+
 """
 config_gui.py — LipOpenSink_Passive configuration GUI (Tkinter + pyserial)
 

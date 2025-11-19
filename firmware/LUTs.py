@@ -1,3 +1,7 @@
+# Licensed under CERN-OHL-S-2.0
+# © 2025 ADSTech [e-ddy]
+# https://ohwr.org/licences/
+
 # 5°C-step LUT built from your NCU18XH103F60RB "Typ" Vout data,
 # converted to 16-bit ADC counts assuming 3.3 V reference.
 # Tuples are (adc_count, temp_c). Note: adc_count decreases as temp increases.

@@ -1,3 +1,7 @@
+# Licensed under CERN-OHL-S-2.0
+# © 2025 ADSTech [e-ddy]
+# https://ohwr.org/licences/
+
 """
 code.py — LipOpenSink_Passive main firmware (RP2040, CircuitPython).
 

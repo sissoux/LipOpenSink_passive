@@ -1,0 +1,2 @@
+FAN_ctrl=TACH,PWM
+USB=Vbus,Dp,Dm

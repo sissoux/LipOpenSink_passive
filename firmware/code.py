@@ -634,6 +634,55 @@ last_led_blink_ms = t_fast
 last_tach_val = fan_tach.value
 
 # -------------------------------
+# Startup LED version blink
+# -------------------------------
+def _blink_n(n: int, on_ms: int = 150, off_ms: int = 150) -> None:
+    try:
+        n = int(n)
+    except Exception:
+        n = 0
+    if n <= 0:
+        return
+    for i in range(n):
+        led.value = True
+        time.sleep(on_ms / 1000.0)
+        led.value = False
+        if i != n - 1:
+            time.sleep(off_ms / 1000.0)
+
+
+def _parse_major_minor(vs: str) -> tuple:
+    major = 0
+    minor = 0
+    try:
+        tokens = vs.replace("-", ".").split(".")
+        for tok in tokens:
+            try:
+                val = int(tok)
+            except Exception:
+                continue
+            if major == 0:
+                major = val
+            elif minor == 0:
+                minor = val
+                break
+    except Exception:
+        pass
+    return major, minor
+
+
+def blink_version() -> None:
+    maj, minr = _parse_major_minor(FW_VERSION)
+    _blink_n(maj)
+    time.sleep(1.0)
+    _blink_n(minr)
+    time.sleep(0.2)
+    led.value = False
+
+# Perform version blink at startup (non-blocking thereafter)
+blink_version()
+
+# -------------------------------
 # UART server
 # -------------------------------
 io = DualCDC()

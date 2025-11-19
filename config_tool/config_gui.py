@@ -36,6 +36,7 @@ import sys
 from dataclasses import dataclass
 from typing import List, Tuple, Optional, Dict
 
+import csv
 import serial  # type: ignore
 from serial.tools import list_ports  # type: ignore
 import tkinter as tk
@@ -43,7 +44,7 @@ from tkinter import ttk, messagebox, filedialog
 
 APP_NAME = "LipOpenSink_Passive Config"
 EXPECTED_NAME = "LipOpenSink_Passive"
-MIN_FW = (1, 3, 0)  # minimal compatible firmware version (major, minor, patch)
+MIN_FW = (1, 3, 1)  # minimal compatible firmware version (major, minor, patch)
 
 CSV_HEADER = [
     "vin_v",
@@ -138,6 +139,11 @@ PARAM_SCHEMA = {
         "Voltage hysteresis for load re-enable. Typical: 0.5V",
         lambda s: 0.0 <= float(s) <= 5.0,
     ),
+    "BYPASS_VIN_CUTOFF": (
+        "Bypass VIN cutoff",
+        "1 = Disable VIN undervoltage cutoff (bypass). 0 = Enforce cutoff",
+        lambda s: int(float(s)) in (0, 1),
+    ),
 }
 
 PARAM_ORDER = [
@@ -157,6 +163,7 @@ PARAM_ORDER = [
     "VIN_CAL_B",
     "LOAD_TRIP_V",
     "HYST_V",
+    "BYPASS_VIN_CUTOFF",
 ]
 
 
@@ -383,9 +390,21 @@ class App(ttk.Frame):
         self.master.rowconfigure(0, weight=1)
 
         self.dev: Optional[Dev] = None
+        self.fw_version_str: str = ""
+        self.fw_version_tuple: Tuple[int, int, int] = (0, 0, 0)
         self.telemetry_running = False
         self.telemetry_thread: Optional[threading.Thread] = None
         self.telemetry_stop = threading.Event()
+        # Track which params the device actually supports (from latest refresh)
+        self.dev_param_keys: set[str] = set()
+
+        # Recording state (temperature + fan duty @ 1 Hz)
+        self.latest_telem: Dict[str, float] = {}
+        self.rec_running: bool = False
+        self.rec_interval_ms: int = 1000  # default 1 second
+        self.rec_data: List[Tuple[float, float, float]] = []  # (time_s, temp_c, duty_pct)
+        self.rec_t0: float = 0.0
+        self._rec_after_id: Optional[str] = None
 
         # Top bar: port selection + connect controls
         self.port_var = tk.StringVar()
@@ -428,23 +447,35 @@ class App(ttk.Frame):
         # Parameters Panel
         params_frame = ttk.LabelFrame(self, text="Parameters")
         params_frame.grid(row=1, column=1, sticky="nsew", padx=8, pady=6)
-        self.param_vars: Dict[str, tk.StringVar] = {}
-        self.param_entries: Dict[str, ttk.Entry] = {}
+        # Store per-parameter Tk variables and widgets
+        # Note: vars may be StringVar or IntVar depending on control type
+        self.param_vars: Dict[str, tk.Variable] = {}
+        self.param_entries: Dict[str, tk.Widget] = {}
         for i, key in enumerate(PARAM_ORDER):
             label, tip, _validator = PARAM_SCHEMA[key]
             ttk.Label(params_frame, text=label+":").grid(row=i, column=0, sticky="e", padx=6, pady=2)
-            var = tk.StringVar(value="")
-            # For MIN_FAN_DUTY, show entry in percent
-            if key == "MIN_FAN_DUTY":
-                ent = ttk.Entry(params_frame, textvariable=var, width=14)
-                ent.grid(row=i, column=1, sticky="w", padx=6, pady=2)
-                ToolTip(ent, f"{label}: {tip}\nKey: {key}\nEnter as percent (0–100)")
+            # Control types per-parameter
+            if key == "BYPASS_VIN_CUTOFF":
+                # Checkbox (1 = bypass enabled, 0 = enforce cutoff)
+                var = tk.IntVar(value=1)
+                chk = ttk.Checkbutton(params_frame, variable=var)
+                chk.grid(row=i, column=1, sticky="w", padx=6, pady=2)
+                ToolTip(chk, f"{label}: {tip}\nKey: {key}\nChecked = 1 (bypass enabled), Unchecked = 0 (enforce cutoff)")
+                self.param_vars[key] = var
+                self.param_entries[key] = chk
             else:
-                ent = ttk.Entry(params_frame, textvariable=var, width=14)
-                ent.grid(row=i, column=1, sticky="w", padx=6, pady=2)
-                ToolTip(ent, f"{label}: {tip}\nKey: {key}")
-            self.param_vars[key] = var
-            self.param_entries[key] = ent
+                var = tk.StringVar(value="")
+                # For MIN_FAN_DUTY, show entry in percent
+                if key == "MIN_FAN_DUTY":
+                    ent = ttk.Entry(params_frame, textvariable=var, width=14)
+                    ent.grid(row=i, column=1, sticky="w", padx=6, pady=2)
+                    ToolTip(ent, f"{label}: {tip}\nKey: {key}\nEnter as percent (0–100)")
+                else:
+                    ent = ttk.Entry(params_frame, textvariable=var, width=14)
+                    ent.grid(row=i, column=1, sticky="w", padx=6, pady=2)
+                    ToolTip(ent, f"{label}: {tip}\nKey: {key}")
+                self.param_vars[key] = var
+                self.param_entries[key] = ent
 
         # Bottom bar: actions
         actions = ttk.Frame(self)
@@ -463,6 +494,12 @@ class App(ttk.Frame):
         ttk.Button(actions, text="Cal VIN (1pt)", command=self.on_cal_vin_1pt).grid(row=0, column=7, padx=8)
         ttk.Button(actions, text="Cal VIN (2pt)", command=self.on_cal_vin_2pt).grid(row=0, column=8, padx=4)
         ttk.Button(actions, text="Cal TEMP (1pt)", command=self.on_cal_temp_1pt).grid(row=0, column=9, padx=8)
+
+        # Recording controls
+        self.btn_start_rec = ttk.Button(actions, text="Start Rec", command=self.on_start_rec)
+        self.btn_start_rec.grid(row=0, column=10, padx=8)
+        self.btn_stop_rec = ttk.Button(actions, text="Stop", command=self.on_stop_rec, state="disabled")
+        self.btn_stop_rec.grid(row=0, column=11, padx=4)
 
         # Status bar
         self.status = tk.StringVar(value="Disconnected")
@@ -499,6 +536,8 @@ class App(ttk.Frame):
         if not ports:
             messagebox.showinfo(APP_NAME, "No serial ports found.")
             return
+        incompatible: list[tuple[str,str]] = []  # (port, version)
+        detected_any = False
         for port in ports:
             try:
                 tmp = Dev(port, int(self.baud_var.get()))
@@ -515,6 +554,7 @@ class App(ttk.Frame):
                 if first.startswith("VER "):
                     ver = first.split(" ", 1)[1].strip()
                     vtuple = parse_version(ver)
+                    detected_any = True
                     if vtuple >= MIN_FW:
                         # Found compatible device
                         tmp.close()
@@ -522,6 +562,8 @@ class App(ttk.Frame):
                         self._open_dev(port)
                         self.status.set(f"Auto-connected on {port} (FW {ver})")
                         return
+                    else:
+                        incompatible.append((port, ver))
                 tmp.close()
             except Exception:
                 try:
@@ -529,7 +571,21 @@ class App(ttk.Frame):
                 except Exception:
                     pass
                 continue
-        messagebox.showwarning(APP_NAME, "No compatible device found.")
+        # Post-scan outcome handling
+        if incompatible and not detected_any:
+            # Should not happen: incompatible implies detected_any, but guard anyway
+            messagebox.showwarning(APP_NAME, "No compatible device found.")
+        elif incompatible:
+            min_str = ".".join(str(x) for x in MIN_FW)
+            details = "\n".join(f"- {p}: FW {v}" for (p,v) in incompatible)
+            messagebox.showwarning(
+                APP_NAME,
+                "Firmware version incompatibility:\n"
+                f"Required >= {min_str}. Found older versions on:\n{details}\n\n"
+                "Please flash firmware {} or newer and retry.".format(min_str)
+            )
+        else:
+            messagebox.showwarning(APP_NAME, "No compatible device found.")
 
     def _open_dev(self, port: str) -> None:
         if self.dev:
@@ -543,6 +599,25 @@ class App(ttk.Frame):
         first, _ = self.dev.cmd("PING", deadline_s=0.8)
         if not (first.startswith("PONG") or first.startswith("OK")):
             raise RuntimeError(f"Unexpected PING response: {first}")
+        # Version check
+        try:
+            ver_first, _ = self.dev.cmd("VER?", deadline_s=1.2)
+            if ver_first.startswith("VER "):
+                ver = ver_first.split(" ", 1)[1].strip()
+                self.fw_version_str = ver
+                self.fw_version_tuple = parse_version(ver)
+                min_str = ".".join(str(x) for x in MIN_FW)
+                if self.fw_version_tuple < MIN_FW:
+                    messagebox.showwarning(
+                        APP_NAME,
+                        f"Firmware {ver} detected. This GUI expects >= {min_str}.\n"
+                        "Some features will be disabled. Please update the device firmware.",
+                    )
+                # Show version in status bar
+                self.status.set(f"Connected on {port} (FW {ver})")
+        except Exception:
+            # Non-fatal; continue without version details
+            pass
         # Enable telemetry for live view
         self.dev.telem_on(rate_ms=250, fmt="CSV")
         self._start_telem_reader()
@@ -550,6 +625,13 @@ class App(ttk.Frame):
 
     def on_disconnect(self) -> None:
         self._stop_telem_reader()
+        # Stop recording if active (without prompting to save)
+        self._cancel_rec_timer() if hasattr(self, "_rec_after_id") else None
+        self.rec_running = False
+        if hasattr(self, "btn_start_rec"):
+            self.btn_start_rec.state(["!disabled"])  # enable
+        if hasattr(self, "btn_stop_rec"):
+            self.btn_stop_rec.state(["disabled"])    # disable
         if self.dev:
             try:
                 self.dev.telem_off()
@@ -609,6 +691,83 @@ class App(ttk.Frame):
         setv("load")
         setv("pg")
         setv("mode")
+
+        # Keep latest numeric telemetry for recording
+        try:
+            self.latest_telem["temp_c"] = float(data.get("temp_c", "nan"))
+        except Exception:
+            pass
+        try:
+            self.latest_telem["duty_pct"] = float(data.get("duty_pct", "nan"))
+        except Exception:
+            pass
+
+    # ---- recording: temp + fan duty → CSV ----
+    def _rec_tick(self) -> None:
+        if not self.rec_running:
+            return
+        # Sample latest values
+        t = time.time() - self.rec_t0
+        temp = self.latest_telem.get("temp_c")
+        duty = self.latest_telem.get("duty_pct")
+        if temp is not None and duty is not None:
+            try:
+                self.rec_data.append((float(t), float(temp), float(duty)))
+            except Exception:
+                pass
+        # schedule next
+        self._rec_after_id = self.after(self.rec_interval_ms, self._rec_tick)
+
+    def _cancel_rec_timer(self) -> None:
+        if self._rec_after_id is not None:
+            try:
+                self.after_cancel(self._rec_after_id)
+            except Exception:
+                pass
+            self._rec_after_id = None
+
+    def on_start_rec(self) -> None:
+        if not self.dev:
+            messagebox.showwarning(APP_NAME, "Connect to a device first.")
+            return
+        if self.rec_running:
+            return
+        self.rec_data = []
+        self.rec_t0 = time.time()
+        self.rec_running = True
+        self.btn_start_rec.state(["disabled"])  # disable
+        self.btn_stop_rec.state(["!disabled"])  # enable
+        self.status.set("Recording started (1 Hz)")
+        self._rec_tick()
+
+    def on_stop_rec(self) -> None:
+        if not self.rec_running:
+            return
+        self.rec_running = False
+        self._cancel_rec_timer()
+        # Prompt for save location
+        default_name = time.strftime("record_%Y%m%d_%H%M%S.csv")
+        path = filedialog.asksaveasfilename(
+            title="Save recording as…",
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+            initialfile=default_name,
+        )
+        if path:
+            try:
+                with open(path, "w", newline="", encoding="utf-8") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["time_s", "temp_c", "fan_duty_pct"])
+                    writer.writerows(self.rec_data)
+                self.status.set(f"Saved {len(self.rec_data)} samples → {path}")
+            except Exception as e:
+                messagebox.showerror("Save CSV", str(e))
+        else:
+            # User canceled save dialog; keep data for this session
+            self.status.set("Recording stopped (save canceled)")
+        # Reset buttons
+        self.btn_start_rec.state(["!disabled"])  # enable
+        self.btn_stop_rec.state(["disabled"])    # disable
 
     # ---- Calibration Helpers ----
     def _get_params_dict(self) -> Dict[str, float]:
@@ -778,6 +937,11 @@ class App(ttk.Frame):
             return
         try:
             p = self.dev.get_params()
+            # Record device-supported params
+            try:
+                self.dev_param_keys = set(p.keys())
+            except Exception:
+                self.dev_param_keys = set()
             for k, var in self.param_vars.items():
                 # For MIN_FAN_DUTY, show as percent
                 if k == "MIN_FAN_DUTY":
@@ -785,9 +949,50 @@ class App(ttk.Frame):
                         var.set(str(round(float(p.get(k, "0")) * 100)))
                     except Exception:
                         var.set("")
+                elif k == "BYPASS_VIN_CUTOFF":
+                    # Map firmware numeric ("1"/"0" or floats) to checkbox state, default to 1 (bypass enabled)
+                    try:
+                        raw = p.get(k, "1")
+                        iv = int(float(raw))
+                        var.set(1 if iv != 0 else 0)
+                    except Exception:
+                        var.set(1)
                 else:
                     var.set(str(p.get(k, "")))
-            self.status.set("Parameters loaded")
+            # Update widget enabled/disabled states robustly
+            missing = []
+            for k, w in self.param_entries.items():
+                if k in self.dev_param_keys:
+                    try:
+                        w.configure(state="normal")
+                    except Exception:
+                        try: w.state(["!disabled"])  # fallback
+                        except Exception: pass
+                else:
+                    missing.append(k)
+                    try:
+                        w.configure(state="disabled")
+                    except Exception:
+                        try: w.state(["disabled"])  # fallback
+                        except Exception: pass
+            if missing:
+                self.status.set("Parameters loaded (unsupported: " + ", ".join(missing) + ")")
+                # If firmware reports version >= MIN_FW but a critical param is missing, warn once.
+                critical = ["BYPASS_VIN_CUTOFF"]
+                if self.fw_version_tuple >= MIN_FW:
+                    absent_critical = [c for c in critical if c in missing]
+                    if absent_critical and not hasattr(self, "_warned_critical"):
+                        self._warned_critical = True
+                        messagebox.showwarning(
+                            APP_NAME,
+                            "Firmware reports version {} but missing parameter(s): {}.\n"
+                            "You may be running an older build with the same version string. Flash the updated firmware to use these features.".format(
+                                self.fw_version_str or "?",
+                                ", ".join(absent_critical),
+                            ),
+                        )
+            else:
+                self.status.set("Parameters loaded")
         except Exception as e:
             messagebox.showerror("Refresh", str(e))
 
@@ -797,7 +1002,15 @@ class App(ttk.Frame):
         try:
             # validate
             for k, var in self.param_vars.items():
-                val = var.get().strip()
+                # Skip keys not supported by current firmware
+                if self.dev_param_keys and (k not in self.dev_param_keys):
+                    continue
+                # Extract string value for validation based on control type
+                if k == "BYPASS_VIN_CUTOFF":
+                    val = str(int(var.get()))  # 0 or 1
+                else:
+                    # StringVar-backed entries
+                    val = str(var.get()).strip()
                 label, tip, validator = PARAM_SCHEMA[k]
                 # For MIN_FAN_DUTY, validate percent
                 if k == "MIN_FAN_DUTY":
@@ -810,18 +1023,33 @@ class App(ttk.Frame):
                             raise ValueError
                     except Exception:
                         raise ValueError(f"Invalid value for {k}: {val}\nEnter percent (0–100)")
+                elif k == "BYPASS_VIN_CUTOFF":
+                    # Ensure 0/1
+                    if val not in ("0", "1"):
+                        raise ValueError(f"Invalid value for {k}: {val}\nExpected 0 or 1")
                 else:
                     if not validator(val):
                         raise ValueError(f"Invalid value for {k}: {val}\n{tip}")
             # push
+            skipped: list[str] = []
             for k, var in self.param_vars.items():
-                val = var.get().strip()
+                # Skip keys not supported by current firmware
+                if self.dev_param_keys and (k not in self.dev_param_keys):
+                    skipped.append(k)
+                    continue
                 if k == "MIN_FAN_DUTY":
-                    duty = float(val) / 100.0
-                    self.dev.set_param(k, str(duty))
-                else:
+                    val = str(float(var.get()) / 100.0)
                     self.dev.set_param(k, val)
-            self.status.set("Parameters applied")
+                elif k == "BYPASS_VIN_CUTOFF":
+                    val = "1" if int(var.get()) != 0 else "0"
+                    self.dev.set_param(k, val)
+                else:
+                    val = str(var.get()).strip()
+                    self.dev.set_param(k, val)
+            if skipped:
+                self.status.set("Parameters applied (skipped: " + ", ".join(skipped) + ")")
+            else:
+                self.status.set("Parameters applied")
         except Exception as e:
             messagebox.showerror("Apply", str(e))
 
@@ -868,7 +1096,7 @@ def main() -> None:
     style = ttk.Style(root)
     if sys.platform.startswith("win"):
         style.theme_use("winnative")
-    root.geometry("880x520")
+    root.geometry("1080x620")
     app = App(root)
     root.protocol("WM_DELETE_WINDOW", lambda: (app.on_disconnect(), root.destroy()))
     root.mainloop()

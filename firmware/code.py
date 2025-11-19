@@ -38,10 +38,11 @@ from uart_cmd import DualCDC, CommandServer
 # -------------------------------
 # Version / constants
 # -------------------------------
-FW_VERSION = "1.3.0"
+FW_VERSION = "1.3.1"  # Bumped version: distinguishes builds with VIN bypass param & GUI sync improvements
 VREF = 3.3
 ADC_MAX = 65535
 SETTINGS_PATH = "/settings.json"  # optional file fallback (read-only while mounted)
+BROKEN_TEMP_CUTOFF_C = -25.0  # Safety: if measured temperature is below this, treat as broken NTC and open load
 
 # -------------------------------
 # Hardware setup
@@ -90,6 +91,8 @@ params = {
     # Added parameters for load cutoff on voltage
     "LOAD_TRIP_V":   8.5,       # Voltage cutoff threshold (V)
     "HYST_V":        0.5,       # Voltage hysteresis (V)
+    # Bypass VIN cutoff (1.0 = bypass enabled, 0.0 = enforce VIN cutoff). When bypassed, only temperature governs cutoff.
+    "BYPASS_VIN_CUTOFF": 1.0,
 
     # NEW: Fan presence checking / LED blink
     "FAN_CHECK_MIN_DUTY": 0.30,   # Only check tach when commanded duty >= this
@@ -119,6 +122,7 @@ lut_index = 0
 load_enabled = True
 base_load_enabled = True  # NEW: temp/VIN policy before fan interlock
 fan_fault = False         # NEW: fan fault flag
+temp_fault_low = False    # NEW: broken sensor safety (NTC open → very low apparent temp)
 
 # Fan ramp
 duty_target = 0.0
@@ -464,6 +468,7 @@ def load_defaults_ram():
             "VIN_CAL_B": 0.0,
             "LOAD_TRIP_V": 8.5,   # Default voltage cutoff
             "HYST_V": 0.5,        # Default voltage hysteresis
+            "BYPASS_VIN_CUTOFF": 1.0,  # Default: bypass VIN cutoff enabled
             # NEW advanced (not exposed in GUI by default)
             "FAN_CHECK_MIN_DUTY": 0.30,
             "FAN_SPINUP_MS":     1500,
@@ -503,6 +508,10 @@ class Backend:
             "MIN_FAN_DUTY",
             "HYST_C",
             "LOAD_TRIP_C",
+            # Also include voltage cutoff parameters so GUI stays in sync
+            "LOAD_TRIP_V",
+            "HYST_V",
+            "BYPASS_VIN_CUTOFF",
             "FAST_DT_MS",
             "SLOW_DT_MS",
             "FC_TEMP_HZ",
@@ -721,6 +730,8 @@ while True:
 
         # Temperature in °C
         last_temp_c = temp_from_adc(tmp_counts)
+        # Broken sensor safety: NTC open (high-side) reads very low (≈ -40°C)
+        temp_fault_low = (last_temp_c < BROKEN_TEMP_CUTOFF_C)
 
         # Policy
         if not fan_manual:
@@ -748,16 +759,19 @@ while True:
             else:
                 fan_fault = False
 
-        # NEW: Base load policy with hysteresis (temp + VIN)
+        # Updated load policy: independent temp and VIN cutoffs with bypass support.
+        bypass_vin = params.get("BYPASS_VIN_CUTOFF", 1.0) >= 0.5
         if base_load_enabled:
-            if (last_temp_c >= params["LOAD_TRIP_C"]) and (vin_v < (params["LOAD_TRIP_V"] - params["HYST_V"])):
+            # Trip if temperature exceeds threshold OR (VIN below threshold AND not bypassed)
+            if (last_temp_c >= params["LOAD_TRIP_C"]) or ((not bypass_vin) and (vin_v < (params["LOAD_TRIP_V"] - params["HYST_V"]))):
                 base_load_enabled = False
         else:
-            if (last_temp_c <= (params["LOAD_TRIP_C"] - params["HYST_C"])) or (vin_v >= params["LOAD_TRIP_V"]):
+            # Re-enable if temp falls sufficiently OR (VIN recovers above threshold AND not bypassed)
+            if (last_temp_c <= (params["LOAD_TRIP_C"] - params["HYST_C"])) or ((not bypass_vin) and (vin_v >= params["LOAD_TRIP_V"])):
                 base_load_enabled = True
 
-        # NEW: Apply fan interlock: no fan → no load
-        load_enabled = base_load_enabled and (not fan_fault)
+        # NEW: Apply interlocks: no fan OR broken sensor → no load
+        load_enabled = base_load_enabled and (not fan_fault) and (not temp_fault_low)
         load_en.value = load_enabled
 
         # NEW: LED blinking on fan fault, else mirror LOAD_EN

@@ -3,7 +3,7 @@
 # https://ohwr.org/licences/
 
 """
-config_gui.py — LipOpenSink_Passive configuration GUI (Tkinter + pyserial)
+config_gui.py — E-DDY configuration GUI (Tkinter + pyserial)
 
 Features
 --------
@@ -46,8 +46,8 @@ from serial.tools import list_ports  # type: ignore
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-APP_NAME = "LipOpenSink_Passive Config"
-EXPECTED_NAME = "LipOpenSink_Passive"
+APP_NAME = "E-DDY Config"
+EXPECTED_NAME = "E-DDY"
 MIN_FW = (1, 3, 1)  # minimal compatible firmware version (major, minor, patch)
 
 CSV_HEADER = [
@@ -377,7 +377,7 @@ class ToolTip:
 # ------------------------------
 
 class App(ttk.Frame):
-    """Main Tk application for LipOpenSink_Passive configuration.
+    """Main Tk application for E-DDY configuration.
 
     - Auto-connect on startup (scans COM ports, asks VER?).
     - Live telemetry panel updated from a dedicated queue.

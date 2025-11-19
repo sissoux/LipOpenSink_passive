@@ -3,7 +3,7 @@
 # https://ohwr.org/licences/
 
 """
-uart_cmd.py — Dual-CDC UART + command server for LipOpenSink_Passive.
+uart_cmd.py — Dual-CDC UART + command server for E-DDY.
 
 This module abstracts USB CDC I/O (console + data) and implements a small,
 line-oriented ASCII protocol with a set of built-in commands. Application logic

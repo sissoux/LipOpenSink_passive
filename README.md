@@ -1,4 +1,4 @@
-# LipOpenSink\_Passive
+# E-DDY
 
 Smart passive load add-on for the ToolkitRC M8D charger. Bridges Channel 1 → Channel 2 into an external 3.3 Ω / 300 W resistor for higher discharge power. An onboard RP2040 supervises temperature, drives a 12 V fan (from the M8D’s USB-C PD), and cuts the load on error/thresholds. A simple USB configuration tool lets you tune behavior and monitor telemetry.
 

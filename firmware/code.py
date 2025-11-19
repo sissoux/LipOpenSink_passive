@@ -3,7 +3,7 @@
 # https://ohwr.org/licences/
 
 """
-code.py — LipOpenSink_Passive main firmware (RP2040, CircuitPython).
+code.py — E-DDY main firmware (RP2040, CircuitPython).
 
 Responsibilities:
 - Hardware init (ADC, GPIO, PWM).
@@ -23,7 +23,7 @@ Requires:
 Optional:
 - boot.py with `usb_cdc.enable(console=True, data=True)` to expose 2 CDC ports.
 
-Author: LipOpenSink project
+Author: E-DDY project
 """
 
 import time
@@ -300,7 +300,7 @@ def service_fan_ramp(now_ms: int) -> None:
 # -------------------------------
 # NVM persistence (CRC-checked, adaptive)
 # -------------------------------
-_MAGIC = b"LOSP"  # LipOpenSink_Passive
+_MAGIC = b"LOSP"  # E-DDY (kept as 'LOSP' for NVM backward compatibility)
 _VER = 1  # settings schema version
 
 
@@ -700,7 +700,7 @@ blink_version()
 # -------------------------------
 io = DualCDC()
 server = CommandServer(io, Backend(io))
-io.write_line("READY LipOpenSink_Passive (FW {})".format(FW_VERSION))
+io.write_line("READY E-DDY (FW {})".format(FW_VERSION))
 
 # -------------------------------
 # Main loop
